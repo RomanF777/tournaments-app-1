@@ -174,20 +174,6 @@ main h1 {
   inherits: false;
 }
 
-@media screen {
-  @media (min-width: 712px) {
-    body {
-      overflow-y: hidden;
-    }
-  }
-}
 
-@media screen {
-  @media (max-width: 712px) {
-    .cards-container {
-      margin-bottom: 100px;
-    }
-  }
-}
 
 

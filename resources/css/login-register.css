@@ -1,0 +1,17 @@
+.auth-block {
+  margin: 0 auto;
+  width: 84vw;
+  max-width: 600px;
+  margin-top: 5vw;
+  background-color: black;
+  padding: 3vw;
+  border-radius: 30px;
+}
+
+.text-input {
+  outline: none;
+}
+
+.text-input:focus {
+  border: 3px solid rgb(255, 255, 0)
+}

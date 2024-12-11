@@ -16,12 +16,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     };
 
     return (
-        <div id='welcome'>
+        <GuestLayout>
+            <div id='welcome'>
             <Head title="Welcome" />
             <div className="min-h-screen flex flex-col items-center justify-between text-white">
-                        <header className="w-full flex justify-between items-center p-6 backdrop-blur-md bg-black">
-                        <a href="/"><img src="https://www.databank.lv/assets/images/logo.png" alt="Databank" className="h-10" /></a>
-                            <nav className="flex space-x-4">
+                        {/* <header className="w-full flex justify-between items-center p-6 backdrop-blur-md bg-black"> */}
+                        {/* <a href="/"><img src="https://www.databank.lv/assets/images/logo.png" alt="Databank" className="h-10" /></a> */}
+                            {/* <nav className="flex space-x-4">
                                 {auth.user ? (
                                     <Link
                                         href={route('dashboard')}
@@ -45,8 +46,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                         </Link>
                                     </>
                                 )}
-                            </nav>
-                        </header>
+                            </nav> */}
+                        {/* </header> */}
 
                         <main className="flex-grow flex items-center justify-center text-center">
                             <div>
@@ -62,6 +63,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         </footer>
             </div>
         </div>
+        </GuestLayout>
+
     );
 }
 
