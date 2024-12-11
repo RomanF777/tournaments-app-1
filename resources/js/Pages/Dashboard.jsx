@@ -1,25 +1,21 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { Cards } from '../Components/Cards'
+import { Cards } from '../Components/Cards';
+// import '../../css/Cards.css';
+import '../../css/app.css';
+import React from 'react';
+
 
 export default function Dashboard() {
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Dashboard
-                </h2>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title="Dashboard" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                        <Cards />
-                    </div>
-                </div>
+            <div className="xxx">
+                <Cards />
             </div>
         </AuthenticatedLayout>
     );
 }
+
+
