@@ -192,13 +192,7 @@ export default function AuthenticatedLayout({ header, children }) {
         <div>
             {/* Navbar */}
             <header className="w-full flex justify-between items-center p-6 backdrop-blur-md bg-black">
-                <a href="/">
-                    <img
-                        src="https://www.databank.lv/assets/images/logo.png"
-                        alt="Databank"
-                        className="h-10"
-                    />
-                </a>
+                <ApplicationLogo />
                 <nav className="flex space-x-4">
                     <NavLink href={route('dashboard')} active={route().current('dashboard')}>
                         Dashboard

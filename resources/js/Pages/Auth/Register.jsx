@@ -4,7 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import '../../../css/login-register.css';
+import '../../../css/auth-reg-log.css';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({

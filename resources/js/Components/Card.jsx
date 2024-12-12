@@ -1,21 +1,42 @@
+// import React from 'react';
+// import { useNavigate } from 'react-router-dom';
+
+// export const Card = ({ cardText, cardImage, route }) => {
+//   const navigate = useNavigate();
+
+//   const handleClick = () => {
+//     navigate(route); // Navigate to the specific route
+//   };
+
+//   return (
+//     <div className="card" onClick={handleClick} style={{ cursor: 'pointer' }}>
+//       <div className="card_image">
+//         <img src={cardImage} alt={cardText} />
+//       </div>
+//       <div className="card_text">
+//         <h2>{cardText}</h2>
+//       </div>
+//     </div>
+//   );
+// };
+
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Inertia } from '@inertiajs/inertia';
 
 export const Card = ({ cardText, cardImage, route }) => {
-  const navigate = useNavigate();
+    const handleClick = () => {
+        Inertia.visit(route); // Navigate to the route using Inertia
+    };
 
-  const handleClick = () => {
-    navigate(route); // Navigate to the specific route
-  };
-
-  return (
-    <div className="card" onClick={handleClick} style={{ cursor: 'pointer' }}>
-      <div className="card_image">
-        <img src={cardImage} alt={cardText} />
-      </div>
-      <div className="card_text">
-        <h2>{cardText}</h2>
-      </div>
-    </div>
-  );
+    return (
+        <div className="card" onClick={handleClick} style={{ cursor: 'pointer' }}>
+            <div className="card_image">
+                <img src={cardImage} alt={cardText} />
+            </div>
+            <div className="card_text">
+                <h2>{cardText}</h2>
+            </div>
+        </div>
+    );
 };

@@ -11,7 +11,7 @@ const cards = [
 
 export const Cards = () => {
   return (
-  <div className='xxx'>
+  <div className='cards'>
     <ul className="cards-container">
       {cards.map((card) => (
         <li key={card.id}>

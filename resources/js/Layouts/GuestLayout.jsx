@@ -78,13 +78,7 @@ export default function GuestLayout({ children }) {
         <div className="">
             {/* Navbar */}
             <header className="w-full flex justify-between items-center p-6 backdrop-blur-md bg-black">
-                <a href="/">
-                    <img
-                        src="https://www.databank.lv/assets/images/logo.png"
-                        alt="Databank"
-                        className="h-10"
-                    />
-                </a>
+                <ApplicationLogo />
                 <nav className="flex space-x-4">
                     {auth.user ? (
                         // If user is signed in, show "Go to main page" button

@@ -11,7 +11,7 @@ export default function Dashboard() {
         <AuthenticatedLayout>
             <Head title="Dashboard" />
 
-            <div className="xxx">
+            <div className="cards">
                 <Cards />
             </div>
         </AuthenticatedLayout>
