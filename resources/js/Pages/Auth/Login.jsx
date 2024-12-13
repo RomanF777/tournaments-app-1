@@ -6,6 +6,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import '../../../css/auth-reg-log.css';
+import '../../../css/app.css';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -23,7 +24,8 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <GuestLayout>
+        <div className='rainbow-bg'>
+            <GuestLayout>
             <Head title="Log in" />
 
             {status && (
@@ -97,5 +99,6 @@ export default function Login({ status, canResetPassword }) {
                 </div>
             </form>
         </GuestLayout>
+        </div>
     );
 }

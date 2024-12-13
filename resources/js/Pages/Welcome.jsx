@@ -19,7 +19,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         <GuestLayout>
             <div id='welcome'>
             <Head title="Welcome" />
-            <div className="min-h-screen flex flex-col items-center justify-between text-white">
+            <div className="rainbow-bg min-h-screen flex flex-col items-center justify-between text-white">
                         {/* <header className="w-full flex justify-between items-center p-6 backdrop-blur-md bg-black"> */}
                         {/* <a href="/"><img src="https://www.databank.lv/assets/images/logo.png" alt="Databank" className="h-10" /></a> */}
                             {/* <nav className="flex space-x-4">

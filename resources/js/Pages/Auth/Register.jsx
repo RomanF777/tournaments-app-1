@@ -5,6 +5,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import '../../../css/auth-reg-log.css';
+import '../../../css/app.css';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -23,7 +24,8 @@ export default function Register() {
     };
 
     return (
-        <GuestLayout>
+        <div className='rainbow-bg'>
+            <GuestLayout>
             <Head title="Register" />
 
             <form className='auth-block' onSubmit={submit}>
@@ -117,5 +119,6 @@ export default function Register() {
                 </div>
             </form>
         </GuestLayout>
+        </div>
     );
 }

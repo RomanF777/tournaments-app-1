@@ -1,5 +1,4 @@
 <?php
-
 // use App\Http\Controllers\ProfileController;
 // use App\Http\Controllers\TournamentsController;
 // use Illuminate\Foundation\Application;
@@ -30,7 +29,6 @@
 // require __DIR__.'/auth.php';
 
 
-
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TournamentsController;
 use Illuminate\Foundation\Application;
@@ -46,11 +44,11 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
 
-// Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/create', function () {
         return Inertia::render('Create');
     })->name('create');
@@ -66,7 +64,8 @@ Route::get('/dashboard', function () {
     Route::get('/quiz', function () {
         return Inertia::render('Quiz');
     })->name('quiz');
-// });
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -31,6 +31,9 @@
     },
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
-        "react-router-dom": "^7.0.2"
+        "@react-three/fiber": "^8.17.10",
+        "@types/three": "^0.170.0",
+        "react-router-dom": "^7.0.2",
+        "three": "^0.171.0"
     }
 }

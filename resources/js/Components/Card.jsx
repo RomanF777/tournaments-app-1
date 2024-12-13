@@ -24,9 +24,16 @@
 import React from 'react';
 import { Inertia } from '@inertiajs/inertia';
 
-export const Card = ({ cardText, cardImage, route }) => {
-    const handleClick = () => {
-        Inertia.visit(route); // Navigate to the route using Inertia
+export const Card = ({ cardText, cardImage, route, onClick }) => {
+    const handleClick = (e) => {
+        if (onClick) {
+            e.preventDefault();
+            onClick();
+        } else if (route) {
+            Inertia.visit(route);
+        } else {
+            console.warn('No onClick handler or route defined for this card');
+        }
     };
 
     return (

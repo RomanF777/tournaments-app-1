@@ -4,6 +4,8 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import '../../../css/app.css';
+
 
 export default function ResetPassword({ token, email }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -22,7 +24,8 @@ export default function ResetPassword({ token, email }) {
     };
 
     return (
-        <GuestLayout>
+        <div className="rainbow-bg">
+            <GuestLayout>
             <Head title="Reset Password" />
 
             <form onSubmit={submit}>
@@ -90,5 +93,6 @@ export default function ResetPassword({ token, email }) {
                 </div>
             </form>
         </GuestLayout>
+        </div>
     );
 }
