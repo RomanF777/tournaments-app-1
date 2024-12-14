@@ -20,34 +20,46 @@ body {
 }
 
 .modal-overlay {
-  position: fixed;
+  position: fixed; /* Ensures it covers the entire screen */
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000; /* High z-index to overlay everything */
 }
 
-.modal-content {
-  background: white;
+.modal-container {
+  background-color: wheat;
+  width: 94vw;
+  max-width: 600px;
+  min-height: 40vh;
+  height: auto;
+  border-radius: 20px;
   padding: 20px;
-  border-radius: 8px;
-  position: relative;
-  max-width: 500px;
-  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative; /* Position for close button alignment */
+  animation: slide-down 0.5s ease-in-out;
+  color: rgb(0, 0, 0);
 }
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 1.5rem;
   cursor: pointer;
+  color: #666;
+  transition: color 0.3s;
+}
+
+.modal-close:hover {
+  color: #333;
 }
 
 

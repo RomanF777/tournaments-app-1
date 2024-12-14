@@ -11,4 +11,8 @@ export default defineConfig({
         }),
         react(),
     ],
+    server: {
+        strictPort: true,
+        cors: true, // Allow cross-origin requests
+      },
 });
