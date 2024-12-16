@@ -4,6 +4,7 @@ export const CreateGame = () => {
   // Состояния для формы
   const [gameName, setGameName] = useState('');
   const [gameType, setGameType] = useState('novus'); // начальный тип игры
+  const [novusType, setNovusType] = useState('hybrid-tournament');
   const [gameDescription, setGameDescription] = useState('');
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
@@ -48,6 +49,23 @@ export const CreateGame = () => {
             </label>
           </div>
 
+          {
+            gameType === 'novus' &&
+              <div>
+                <label>
+              Select type of the game:
+              <select
+                value={novusType}
+                onChange={(e) => setNovusType(e.target.value)}
+                required
+              >
+                <option value="hybrid-tournament">Hybrid Tournament</option>
+                <option value="with-bye-round">Tournament with "Bye round"</option>
+              </select>
+            </label>
+              </div>
+          }
+
           <div>
             <label>
               Описание игры:
@@ -55,7 +73,7 @@ export const CreateGame = () => {
                 value={gameDescription}
                 onChange={(e) => setGameDescription(e.target.value)}
                 placeholder="Введите описание игры"
-                required
+                // required
               />
             </label>
           </div>
@@ -67,6 +85,7 @@ export const CreateGame = () => {
           <h2>Игра успешно создана!</h2>
           <p><strong>Название игры:</strong> {gameName}</p>
           <p><strong>Тип игры:</strong> {gameType}</p>
+          {gameType === 'novus' && <p><strong>Type of novus</strong> {novusType}</p>}
           <p><strong>Описание:</strong> {gameDescription}</p>
         </div>
       )}
