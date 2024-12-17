@@ -1,26 +1,101 @@
 import React, { useState } from 'react';
+import { usePage } from '@inertiajs/react';
+import axios from 'axios';
+
+// Set default Axios configuration
+axios.defaults.baseURL = 'http://tournaments.test/'; // Replace with your API base URL
+// axios.defaults.withCredentials = true; // Enable cookies if needed
 
 export const CreateGame = () => {
-  // Состояния для формы
   const [gameName, setGameName] = useState('');
-  const [gameType, setGameType] = useState('novus'); // начальный тип игры
+  const [gameType, setGameType] = useState('novus');
   const [novusType, setNovusType] = useState('hybrid-tournament');
   const [gameDescription, setGameDescription] = useState('');
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Обработчик отправки формы
-  const handleSubmit = (e) => {
+  const user = usePage().props.auth.user;
+    console.log(user.name);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Здесь можно отправить данные на сервер, если нужно
+    // const formData = {
+    //   name: gameName,
+    //   type: gameType,
+    //   description: gameDescription,
+    //   novus_type: gameType === 'novus' ? novusType : null,
+    // };
+
+  //   try {
+  //     const response = await fetch('http://tournaments.test/tournament', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(formData),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to create the game');
+  //     }
+
+  //     const data = await response.json();
+  //     console.log('Game created:', data);
+
+  //     setIsFormSubmitted(true);
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //     setErrorMessage('An error occurred while creating the game.');
+  //   }
+  // };
+
+//   try {
+
+//     // Replace fetch with Axios
+//     const response = await axios.post('/tournament', formData);
+
+//     console.log('Game created:', response.data);
+
+//     setIsFormSubmitted(true);
+//   } catch (error) {
+//     console.error('Error:', error);
+//     setErrorMessage('An error occurred while creating the game.');
+//   }
+// };
+
+  try {
+
+
+    // Include user.name in the formData
+    const formData = {
+      name: gameName,
+      type: gameType,
+      description: gameDescription,
+      novus_type: gameType === 'novus' ? novusType : null,
+      user: user.name, // Adding user.name
+    };
+
+    // Send the updated formData with Axios
+    const response = await axios.post('/tournament', formData);
+
+    console.log('Game created:', response.data);
+    console.log('Created by:', user.name);
+
     setIsFormSubmitted(true);
+  } catch (error) {
+    console.error('Error:', error);
+    setErrorMessage('An error occurred while creating the game.');
+  }
   };
 
   return (
     <div>
       <h1>Создание игры</h1>
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       {!isFormSubmitted ? (
         <form onSubmit={handleSubmit}>
+
           <div>
             <label>
               Название игры:
@@ -49,22 +124,21 @@ export const CreateGame = () => {
             </label>
           </div>
 
-          {
-            gameType === 'novus' &&
-              <div>
-                <label>
-              Select type of the game:
-              <select
-                value={novusType}
-                onChange={(e) => setNovusType(e.target.value)}
-                required
-              >
-                <option value="hybrid-tournament">Hybrid Tournament</option>
-                <option value="with-bye-round">Tournament with "Bye round"</option>
-              </select>
-            </label>
-              </div>
-          }
+          {gameType === 'novus' && (
+            <div>
+              <label>
+                Select type of the game:
+                <select
+                  value={novusType}
+                  onChange={(e) => setNovusType(e.target.value)}
+                  required
+                >
+                  <option value="hybrid-tournament">Hybrid Tournament</option>
+                  <option value="with-bye-round">Tournament with "Bye round"</option>
+                </select>
+              </label>
+            </div>
+          )}
 
           <div>
             <label>
@@ -73,7 +147,7 @@ export const CreateGame = () => {
                 value={gameDescription}
                 onChange={(e) => setGameDescription(e.target.value)}
                 placeholder="Введите описание игры"
-                // required
+                required
               />
             </label>
           </div>
@@ -85,7 +159,7 @@ export const CreateGame = () => {
           <h2>Игра успешно создана!</h2>
           <p><strong>Название игры:</strong> {gameName}</p>
           <p><strong>Тип игры:</strong> {gameType}</p>
-          {gameType === 'novus' && <p><strong>Type of novus</strong> {novusType}</p>}
+          {gameType === 'novus' && <p><strong>Type of novus:</strong> {novusType}</p>}
           <p><strong>Описание:</strong> {gameDescription}</p>
         </div>
       )}
