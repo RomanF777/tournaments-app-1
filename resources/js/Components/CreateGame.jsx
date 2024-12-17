@@ -21,50 +21,6 @@ export const CreateGame = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // const formData = {
-    //   name: gameName,
-    //   type: gameType,
-    //   description: gameDescription,
-    //   novus_type: gameType === 'novus' ? novusType : null,
-    // };
-
-  //   try {
-  //     const response = await fetch('http://tournaments.test/tournament', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(formData),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to create the game');
-  //     }
-
-  //     const data = await response.json();
-  //     console.log('Game created:', data);
-
-  //     setIsFormSubmitted(true);
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //     setErrorMessage('An error occurred while creating the game.');
-  //   }
-  // };
-
-//   try {
-
-//     // Replace fetch with Axios
-//     const response = await axios.post('/tournament', formData);
-
-//     console.log('Game created:', response.data);
-
-//     setIsFormSubmitted(true);
-//   } catch (error) {
-//     console.error('Error:', error);
-//     setErrorMessage('An error occurred while creating the game.');
-//   }
-// };
-
   try {
 
 

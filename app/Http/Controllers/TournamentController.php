@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tournament;
+use Inertia\Inertia;
 
 class TournamentController extends Controller
 {
@@ -24,5 +25,14 @@ class TournamentController extends Controller
             'tournament' => $tournament,
         ], 201);
     }
+
+    public function index()
+    {
+    $tournaments = Tournament::all(); // Fetch all tournaments
+    return Inertia::render('Tournaments', [
+        'tournaments' => $tournaments, // Pass tournaments as props
+    ]);
+    }
+
 }
 
