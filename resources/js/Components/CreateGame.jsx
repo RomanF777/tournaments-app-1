@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
+import { Inertia } from '@inertiajs/inertia'
 
 // Set default Axios configuration
 axios.defaults.baseURL = 'http://tournaments.test/'; // Replace with your API base URL
@@ -83,6 +84,7 @@ export const CreateGame = () => {
     console.log('Created by:', user.name);
 
     setIsFormSubmitted(true);
+    Inertia.visit('/tournaments')
   } catch (error) {
       if (error.response && error.response.data.errors) {
         setErrorMessage('Validation failed: ' + Object.values(error.response.data.errors).join(', '));

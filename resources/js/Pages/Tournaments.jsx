@@ -1,14 +1,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react'
+import { Tournament } from '@/Components/Tournament';
+import '../../css/app.css';
 
 export default function Tournaments() {
   return (
-    <AuthenticatedLayout>
+    <div className='rainbow-bg'>
+      <AuthenticatedLayout>
       <Head title="hehheehhe" />
       <div>
           <h1>Welcome to Tournaments!</h1>
-          <div style={{height:'500px', background:'silver'}}></div>
+          <Tournament />
       </div>
     </AuthenticatedLayout>
+    </div>
   )
 }

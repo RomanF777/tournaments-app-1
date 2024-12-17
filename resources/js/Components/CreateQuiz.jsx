@@ -37,6 +37,7 @@ export const CreateQuiz = () => {
 
   return (
     <div style={{ padding: '20px' }}>
+      <p style={{color: 'red', fontWeight: '900', margin: '0 auto'}}>In progress...</p>
       <h1>Create a Quiz</h1>
       <div style={{ marginBottom: '20px' }}>
         <label>
