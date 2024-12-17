@@ -71,7 +71,7 @@ export const CreateGame = () => {
     const formData = {
       name: gameName,
       type: gameType,
-      description: gameDescription,
+      description: gameDescription || null,
       novus_type: gameType === 'novus' ? novusType : null,
       user: user.name, // Adding user.name
     };
@@ -84,8 +84,11 @@ export const CreateGame = () => {
 
     setIsFormSubmitted(true);
   } catch (error) {
-    console.error('Error:', error);
-    setErrorMessage('An error occurred while creating the game.');
+      if (error.response && error.response.data.errors) {
+        setErrorMessage('Validation failed: ' + Object.values(error.response.data.errors).join(', '));
+      } else {
+        setErrorMessage('An error occurred while creating the game.');
+      }
   }
   };
 
@@ -147,7 +150,7 @@ export const CreateGame = () => {
                 value={gameDescription}
                 onChange={(e) => setGameDescription(e.target.value)}
                 placeholder="Введите описание игры"
-                required
+
               />
             </label>
           </div>

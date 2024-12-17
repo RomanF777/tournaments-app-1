@@ -13,7 +13,7 @@ class TournamentController extends Controller
             'user' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:novus,chess,cards',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'novus_type' => 'nullable|string|in:hybrid-tournament,with-bye-round',
         ]);
 
