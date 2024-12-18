@@ -35,6 +35,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/quiz', function () {
         return Inertia::render('Quiz');
     })->name('quiz');
+
+    Route::get('/tournaments', [TournamentController::class, 'index'])->name('tournaments.index');
+
 });
 
 Route::middleware('auth')->group(function () {
@@ -45,7 +48,6 @@ Route::middleware('auth')->group(function () {
 
 // Tournament routes
 Route::post('/tournament', [TournamentController::class, 'store']);
-Route::get('/tournaments', [TournamentController::class, 'index'])->name('tournaments.index');
 
 require __DIR__.'/auth.php';
 

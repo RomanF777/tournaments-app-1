@@ -51,7 +51,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
                         <main className="flex-grow flex items-center justify-center text-center">
                             <div>
-                                <h1 className="text-5xl font-extrabold drop-shadow-lg">Welcome to the Portal</h1>
+                                <h1 className="welcome-page-title text-5xl font-extrabold drop-shadow-lg">Welcome to the Portal</h1>
                             </div>
                         </main>
 

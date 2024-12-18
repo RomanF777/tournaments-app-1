@@ -1,0 +1,89 @@
+.tournaments-page-body {
+  display: flex;
+  justify-content: center;
+}
+
+.tournament-component {
+  background-color: antiquewhite;
+  border-radius: 20px;
+  padding: 12px;
+  margin: 3vh 0 3vh 0;
+  color: black;
+  display: flex;
+  min-height: 120px;
+  width: 80vw;
+  max-width: 800px;
+  position: relative;
+}
+
+#right {
+  width: 50%;
+}
+
+.tournament-component-title {
+  letter-spacing: 10%;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: block;
+  font-family: 'Shantell Sans';
+}
+
+.tournament-component-typeOfTheGame {
+  display: flex;
+  justify-content: flex-start;
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+.tournament-component-creator {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#left {
+  width: 50%;
+}
+
+
+.welcome {
+  text-align: center;
+  background: linear-gradient(90deg, #e933ff, #ffb400, #ff3333, #334dff, #e933ff);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textflow 5s linear infinite;
+  font-size: 3rem;
+  font-weight: 900;
+}
+@keyframes textflow {
+  from {background-position: 0% center}
+  to {background-position: 200% center}
+}
+
+.bold {
+  font-weight: bold;
+}
+
+/* !Arrow button:
+
+
+Name of the game
+Name of creator
+Type of the game
+Arrow button
+Date of creating
+Description of the user
+
+If Admin: remove the game
+
+
+
+Arrow button:
+
+
+Connect button
+List of participants
+Description of the game
+
+ */

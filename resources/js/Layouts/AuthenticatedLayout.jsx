@@ -234,7 +234,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
             {/* Content */}
             <div>
-                <main>{children}</main>
+                {children}
             </div>
         </div>
     );
