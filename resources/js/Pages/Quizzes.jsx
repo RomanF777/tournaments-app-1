@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Quiz() {
+export default function Quizzes() {
   return (
     <AuthenticatedLayout>
     </AuthenticatedLayout>

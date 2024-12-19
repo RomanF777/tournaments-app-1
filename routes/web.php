@@ -32,9 +32,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Recent');
     })->name('recent');
 
-    Route::get('/quiz', function () {
-        return Inertia::render('Quiz');
-    })->name('quiz');
+    Route::get('/quizzes', function () {
+        return Inertia::render('Quizzes');
+    })->name('quizzes');
 
     Route::get('/tournaments', [TournamentController::class, 'index'])->name('tournaments.index');
 

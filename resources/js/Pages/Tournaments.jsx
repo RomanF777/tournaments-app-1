@@ -8,13 +8,13 @@ export default function Tournaments({ tournaments }) {
     <div className='tournaments-page'>
       <AuthenticatedLayout>
       <Head title="Tournaments" />
-      <div>
+      <div className='tournaments-page-title'>
         <h1 className='welcome'>Welcome to Tournaments!</h1>
       </div>
       <div className='tournaments-page-body'>
         {tournaments.length > 0 ? (
           <ul>
-            {tournaments.map((tournament) => (
+            {tournaments.slice().reverse().map((tournament) => (
               <li key={tournament.id} style={{ marginBottom: '1rem' }}>
                 <Tournament tournament={tournament} />
               </li>
