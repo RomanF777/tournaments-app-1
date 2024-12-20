@@ -20,7 +20,7 @@ class Tournament extends Model
     /**
      * Define the relationship to the User model.
      */
-    public function creator()
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

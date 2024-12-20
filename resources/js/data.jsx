@@ -17,9 +17,9 @@ export const cards_create = [
 ];
 
 export const tournaments_game_descriptions = [
-  {id: 1, gameType: 'novus', name: 'About Novus', description: 'Novus! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae dui a leo laoreet gravida. Donec accumsan erat et mi lobortis finibus. Fusce vehicula quis lectus in placerat. Phasellus tortor dolor, molestie tincidunt ex nec, imperdiet maximus tortor.'},
-  {id: 2, gameType: 'chess', name: 'About Chess', description: 'Chess! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae dui a leo laoreet gravida. Donec accumsan erat et mi lobortis finibus. Fusce vehicula quis lectus in placerat. Phasellus tortor dolor, molestie tincidunt ex nec, imperdiet maximus tortor.'},
-  {id: 3, gameType: 'cards', name: 'About Cards', description: 'Cards! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae dui a leo laoreet gravida. Donec accumsan erat et mi lobortis finibus. Fusce vehicula quis lectus in placerat. Phasellus tortor dolor, molestie tincidunt ex nec, imperdiet maximus tortor.'},
+  {id: 1, gameType: 'novus', name: 'About Novus', descriptionOfTheGame: 'Novus! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae dui a leo laoreet gravida. Donec accumsan erat et mi lobortis finibus. Fusce vehicula quis lectus in placerat. Phasellus tortor dolor, molestie tincidunt ex nec, imperdiet maximus tortor.'},
+  {id: 2, gameType: 'chess', name: 'About Chess', descriptionOfTheGame: 'Chess! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae dui a leo laoreet gravida. Donec accumsan erat et mi lobortis finibus. Fusce vehicula quis lectus in placerat. Phasellus tortor dolor, molestie tincidunt ex nec, imperdiet maximus tortor.'},
+  {id: 3, gameType: 'cards', name: 'About Cards', descriptionOfTheGame: 'Cards! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae dui a leo laoreet gravida. Donec accumsan erat et mi lobortis finibus. Fusce vehicula quis lectus in placerat. Phasellus tortor dolor, molestie tincidunt ex nec, imperdiet maximus tortor.'},
 ]
 
 

@@ -120,7 +120,7 @@
   padding: 18px;
   color: black;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   min-height: 0; /* Start from 0 height */
   max-height: 0; /* Start from 0 height */
   overflow: hidden; /* Hide content while closed */

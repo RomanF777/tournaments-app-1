@@ -35,19 +35,42 @@ class TournamentController extends Controller
         ], 201);
     }
 
+    // public function index()
+    // {
+    // $tournaments = Tournament::all();
+    // $user = Auth::user();
+
+    // return Inertia::render('Tournaments', [
+    //     'tournaments' => $tournaments->map(function ($tournament) use ($user) {
+    //         // Check if the user is the creator (admin)
+    //         $tournament->isAdmin = $user->id === $tournament->user_id;
+    //         return $tournament;
+    //     }),
+    // ]);
+    // }
+
     public function index()
-    {
-    $tournaments = Tournament::all();
+{
+    // Retrieve all tournaments with the user information
+    $tournaments = Tournament::with('user')->get();
+
     $user = Auth::user();
 
     return Inertia::render('Tournaments', [
         'tournaments' => $tournaments->map(function ($tournament) use ($user) {
-            // Check if the user is the creator (admin)
-            $tournament->isAdmin = $user->id === $tournament->user_id;
-            return $tournament;
+            return [
+                'id' => $tournament->id,
+                'name' => $tournament->name,
+                'type' => $tournament->type,
+                'novus_type' => $tournament->novus_type,
+                'description' => $tournament->description,
+                'user_name' => $tournament->user->name ?? null, // Get the user's name
+                'isAdmin' => $user->id === $tournament->user_id, // Check admin status
+            ];
         }),
     ]);
-    }
+}
+
 
     // Show specific tournament
     public function show($id)
@@ -68,24 +91,9 @@ class TournamentController extends Controller
         ]);
     }
 
-    // public function destroy($id)
-    // {
-    // $tournament = Tournament::findOrFail($id);
-
-    // // Check if the user is the creator of the tournament
-    // if (auth()->id() !== $tournament->user_id) {
-    //     return response()->json(['message' => 'Unauthorized'], 403);
-    // }
-
-    // // Proceed with deletion
-    // $tournament->delete();
-
-    // return response()->json(['message' => 'Tournament deleted successfully']);
-    // }
-
 
     public function destroy($id)
-{
+    {
     $tournament = Tournament::findOrFail($id);
 
     // Check if the user is the creator of the tournament
@@ -97,9 +105,20 @@ class TournamentController extends Controller
     $tournament->delete();
 
     return response()->json(['message' => 'Tournament deleted successfully']);
-}
-
-
+    }
 
 }
 
+
+// CREATE TABLE tournaments (
+//     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+//     user_id VARCHAR(255) NOT NULL,
+//     name VARCHAR(255) NOT NULL,
+//     type ENUM('novus', 'chess', 'cards') NOT NULL,
+//     description TEXT NULL,
+//     novus_type ENUM('hybrid-tournament', 'with-bye-round') NULL,
+//     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+//     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+// );
+
+// ALTER TABLE tournaments MODIFY description VARCHAR(333) NULL;
