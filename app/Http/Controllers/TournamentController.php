@@ -68,8 +68,24 @@ class TournamentController extends Controller
         ]);
     }
 
+    // public function destroy($id)
+    // {
+    // $tournament = Tournament::findOrFail($id);
+
+    // // Check if the user is the creator of the tournament
+    // if (auth()->id() !== $tournament->user_id) {
+    //     return response()->json(['message' => 'Unauthorized'], 403);
+    // }
+
+    // // Proceed with deletion
+    // $tournament->delete();
+
+    // return response()->json(['message' => 'Tournament deleted successfully']);
+    // }
+
+
     public function destroy($id)
-    {
+{
     $tournament = Tournament::findOrFail($id);
 
     // Check if the user is the creator of the tournament
@@ -81,7 +97,8 @@ class TournamentController extends Controller
     $tournament->delete();
 
     return response()->json(['message' => 'Tournament deleted successfully']);
-    }
+}
+
 
 
 }
