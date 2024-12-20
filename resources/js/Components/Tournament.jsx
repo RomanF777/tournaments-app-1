@@ -1,15 +1,34 @@
-import { useState } from 'react';
-import '../../css/tournaments.css';
+import React, { useState } from 'react';
 import { DropDownWindow } from './DropDownWindow';
+import axios from 'axios';
 
 export const Tournament = ({ tournament }) => {
-  const { name, type, novus_type, user } = tournament;
+  const { id, name, type, novus_type, user, isAdmin } = tournament;  // Destructure isAdmin here
   const typeOfTheGame = type.slice(0, 1).toUpperCase() + type.slice(1);
 
   const [dropDown, setDropDown] = useState(false);
 
   const toggleDropDown = () => {
     setDropDown(!dropDown);
+  };
+
+  const handleDeleteTournament = async () => {
+    try {
+      if (isAdmin) {
+        // Send DELETE request to the backend
+        const response = await axios.delete(`/tournament/${id}`);
+
+        // Handle success (you can redirect or update the UI)
+        console.log('Tournament deleted:', response.data);
+        alert('Tournament deleted successfully!');
+
+        // Optionally, you can remove this tournament from the local state if you have a parent component managing the list of tournaments.
+        // For example, if you have a parent component that renders a list of tournaments, you can trigger a re-fetch or update state here.
+      }
+    } catch (error) {
+      console.error('Error deleting tournament:', error);
+      alert('An error occurred while deleting the tournament.');
+    }
   };
 
   return (
@@ -46,6 +65,13 @@ export const Tournament = ({ tournament }) => {
           </button>
         </div>
       </div>
+      {/* Conditional rendering based on isAdmin */}
+      {isAdmin && (
+        <div className="admin-actions">
+          <button>Edit Tournament</button>
+          <button onClick={handleDeleteTournament}>Delete Tournament</button>
+        </div>
+      )}
       <DropDownWindow type={type} isOpen={dropDown} />
     </div>
   );

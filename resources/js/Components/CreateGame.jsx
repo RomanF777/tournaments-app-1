@@ -8,6 +8,7 @@ axios.defaults.baseURL = 'http://tournaments.test/'; // Replace with your API ba
 // axios.defaults.withCredentials = true; // Enable cookies if needed
 
 export const CreateGame = () => {
+
   const [gameName, setGameName] = useState('');
   const [gameType, setGameType] = useState('novus');
   const [novusType, setNovusType] = useState('hybrid-tournament');
@@ -15,8 +16,7 @@ export const CreateGame = () => {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const user = usePage().props.auth.user;
-    console.log(user.name);
+  const { tournament, isAdmin } = usePage().props;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,14 +30,14 @@ export const CreateGame = () => {
       type: gameType,
       description: gameDescription || null,
       novus_type: gameType === 'novus' ? novusType : null,
-      user: user.name, // Adding user.name
+      // user: user.name,
     };
 
     // Send the updated formData with Axios
     const response = await axios.post('/tournament', formData);
 
     console.log('Game created:', response.data);
-    console.log('Created by:', user.name);
+    // console.log('Created by:', user.name);
 
     setIsFormSubmitted(true);
     Inertia.visit('/tournaments')

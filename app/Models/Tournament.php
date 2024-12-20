@@ -10,11 +10,19 @@ class Tournament extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user',
+        'user_id',
         'name',
         'type',
         'novus_type',
         'description',
     ];
+
+    /**
+     * Define the relationship to the User model.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }
 

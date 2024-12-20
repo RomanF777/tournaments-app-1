@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Tournament;
+use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TournamentController;
 use Illuminate\Foundation\Application;
@@ -48,6 +51,8 @@ Route::middleware('auth')->group(function () {
 
 // Tournament routes
 Route::post('/tournament', [TournamentController::class, 'store']);
+Route::delete('/tournament/{id}', [TournamentController::class, 'destroy']);
+
 
 require __DIR__.'/auth.php';
 

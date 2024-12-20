@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Tournament;
 use Inertia\Inertia;
@@ -11,14 +12,22 @@ class TournamentController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'user' => 'required|string|max:255',
+            // 'user' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:novus,chess,cards',
-            'description' => 'nullable|string',
             'novus_type' => 'nullable|string|in:hybrid-tournament,with-bye-round',
+            'description' => 'nullable|string',
         ]);
 
-        $tournament = Tournament::create($validatedData);
+        // $tournament = Tournament::create($validatedData);
+        // Associate the tournament with the authenticated user's ID.
+        $tournament = Tournament::create([
+            'name' => $validatedData['name'],
+            'type' => $validatedData['type'],
+            'novus_type' => $validatedData['novus_type'],
+            'description' => $validatedData['description'],
+            'user_id' => auth()->id(), // Ensure user_id is set correctly
+        ]);
 
         return response()->json([
             'message' => 'Tournament created successfully',
@@ -28,11 +37,52 @@ class TournamentController extends Controller
 
     public function index()
     {
-    $tournaments = Tournament::all(); // Fetch all tournaments
+    $tournaments = Tournament::all();
+    $user = Auth::user();
+
     return Inertia::render('Tournaments', [
-        'tournaments' => $tournaments, // Pass tournaments as props
+        'tournaments' => $tournaments->map(function ($tournament) use ($user) {
+            // Check if the user is the creator (admin)
+            $tournament->isAdmin = $user->id === $tournament->user_id;
+            return $tournament;
+        }),
     ]);
     }
+
+    // Show specific tournament
+    public function show($id)
+    {
+        // Get the current logged-in user
+        $user = Auth::user();
+
+        // Find the tournament by ID
+        $tournament = Tournament::findOrFail($id);
+
+        // Check if the logged-in user is the creator (admin) of the tournament
+        $isAdmin = ($user->id === $tournament->user_id);
+
+        // Return the tournament data along with the isAdmin flag to the frontend (Inertia.js view)
+        return Inertia::render('TournamentDetails', [
+            'tournament' => $tournament,
+            'isAdmin' => $isAdmin, // Pass the admin status to the view
+        ]);
+    }
+
+    public function destroy($id)
+    {
+    $tournament = Tournament::findOrFail($id);
+
+    // Check if the user is the creator of the tournament
+    if (auth()->id() !== $tournament->user_id) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Proceed with deletion
+    $tournament->delete();
+
+    return response()->json(['message' => 'Tournament deleted successfully']);
+    }
+
 
 }
 
