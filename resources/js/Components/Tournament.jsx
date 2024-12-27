@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DropDownWindow } from './DropDownWindow';
 import axios from 'axios';
 import { usePage } from '@inertiajs/react';
@@ -8,12 +8,23 @@ export const Tournament = ({ tournament, onDelete }) => {
   const { id, user_name, user_id, name, type, novus_type, isAdmin, description, participants } = tournament;
   const typeOfTheGame = type.slice(0, 1).toUpperCase() + type.slice(1);
 
-  const creatorName = user_id;
-
   const [follow, setFollow] = useState(false);
   const [participantsCount, setParticipantsCount] = useState(participants.length);
   const [dropDown, setDropDown] = useState(false);
-  const [participantsList, setParticipantsList] = useState(participants);  // Use initial participants
+  const [participantsList, setParticipantsList] = useState(participants);
+  const [isRecruiting, setIsRecruiting] = useState(tournament.isRecruiting || true); // Default to true
+
+  useEffect(() => {
+    const fetchRecruitingStatus = async () => {
+      try {
+        const response = await axios.get(`/tournament/${id}/recruiting-status`);
+        setIsRecruiting(response.data.isRecruiting);
+      } catch (error) {
+        console.error('Error fetching recruiting status:', error);
+      }
+    };
+    fetchRecruitingStatus();
+  }, [id]);
 
   const toggleDropDown = () => {
     setDropDown(!dropDown);
@@ -22,12 +33,8 @@ export const Tournament = ({ tournament, onDelete }) => {
   const handleDeleteTournament = async () => {
     try {
       if (isAdmin) {
-        // Send DELETE request to the backend
-        const response = await axios.delete(`/tournament/${id}`);
-
-        // If successful, call onDelete to update the parent state
+        await axios.delete(`/tournament/${id}`);
         onDelete(id);
-
         alert('Tournament deleted successfully!');
       }
     } catch (error) {
@@ -39,14 +46,9 @@ export const Tournament = ({ tournament, onDelete }) => {
   const handleFollow = async () => {
     try {
       const response = await axios.post(`/tournament/${id}/follow`);
-
-      const updatedParticipants = response.data.participants;
-      setParticipantsList(updatedParticipants);
+      setParticipantsList(response.data.participants);
       setParticipantsCount(response.data.participant_count);
-
-      // Toggle follow state
-      setFollow(!follow); // Switch between Follow and Leave
-
+      setFollow(!follow);
       alert(response.data.message);
     } catch (error) {
       console.error('Error following/leaving the tournament:', error);
@@ -54,7 +56,27 @@ export const Tournament = ({ tournament, onDelete }) => {
     }
   };
 
+  const handleStopRecruiting = async () => {
+    try {
+      const response = await axios.post(`/tournament/${id}/stop-recruiting`);
+      setIsRecruiting(false);
+      alert(response.data.message);
+    } catch (error) {
+      console.error('Error stopping recruiting:', error);
+      alert('An error occurred while stopping recruiting.');
+    }
+  };
 
+  const handleStartRecruiting = async () => {
+    try {
+      const response = await axios.post(`/tournament/${id}/start-recruiting`);
+      setIsRecruiting(true);
+      alert(response.data.message);
+    } catch (error) {
+      console.error('Error starting recruiting:', error);
+      alert('An error occurred while starting recruiting.');
+    }
+  };
 
   return (
     <div className="tournament-component-dropDownWindow-component">
@@ -78,10 +100,24 @@ export const Tournament = ({ tournament, onDelete }) => {
         </div>
         <div id="right">
           <div className="tournament-component-creator">
-            {/* Conditional rendering based on isAdmin */}
             <div className="button-container">
-              {isAdmin && (<button onClick={handleDeleteTournament} style={{display: 'block'}}>Delete Tournament</button>)}
-              <button onClick={handleFollow} style={{ display: 'block' }}>{follow ? 'Leave the tournament' : 'Follow the Tournament'}</button>
+              {isAdmin && (
+                <>
+                  {isRecruiting ? (
+                    <button onClick={handleStopRecruiting}>Stop recruiting</button>
+                  ) : (
+                    <button onClick={handleStartRecruiting}>Start recruiting</button>
+                  )}
+                  <button onClick={handleDeleteTournament}>Delete Tournament</button>
+                </>
+              )}
+              {isRecruiting ? (
+                <button onClick={handleFollow}>
+                  {follow ? 'Leave the tournament' : 'Follow the Tournament'}
+                </button>
+              ) : (
+                <p>Recruiting has been stopped.</p> // Replace button with a message or nothing
+              )}
             </div>
             <h4>
               <span className="bold">Created by<br /></span>{user_name}
@@ -92,7 +128,7 @@ export const Tournament = ({ tournament, onDelete }) => {
             type="button"
             className="tournament-component-dropDownButton"
           >
-            {dropDown ? <IoMdArrowDropupCircle style={{fontSize: '2rem'}} /> : <IoMdArrowDropdownCircle style={{fontSize: '2rem'}} />}
+            {dropDown ? <IoMdArrowDropupCircle style={{ fontSize: '2rem' }} /> : <IoMdArrowDropdownCircle style={{ fontSize: '2rem' }} />}
           </button>
         </div>
       </div>
@@ -101,8 +137,9 @@ export const Tournament = ({ tournament, onDelete }) => {
         description={description}
         type={type}
         isOpen={dropDown}
-        participants={participantsList}  // Pass updated participants list
-    />
+        participants={participantsList}
+      />
     </div>
   );
 };
+

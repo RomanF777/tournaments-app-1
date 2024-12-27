@@ -145,4 +145,44 @@ class TournamentController extends Controller
 
 
 
+
+
+
+
+        public function getRecruitingStatus($id)
+        {
+            $tournament = Tournament::findOrFail($id);
+            return response()->json(['isRecruiting' => $tournament->is_recruiting]);
+        }
+
+        public function stopRecruiting($id)
+        {
+            $tournament = Tournament::findOrFail($id);
+
+            if (auth()->id() !== $tournament->user_id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $tournament->is_recruiting = false;
+            $tournament->save();
+
+            return response()->json(['message' => 'Recruiting stopped successfully']);
+        }
+
+        public function startRecruiting($id)
+        {
+            $tournament = Tournament::findOrFail($id);
+
+            if (auth()->id() !== $tournament->user_id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $tournament->is_recruiting = true;
+            $tournament->save();
+
+            return response()->json(['message' => 'Recruiting started successfully']);
+        }
+
+
+
 }

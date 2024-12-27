@@ -41,6 +41,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/tournaments', [TournamentController::class, 'index'])->name('tournaments.index');
 
+
+
+    Route::get('/tournament/{id}/recruiting-status', [TournamentController::class, 'getRecruitingStatus']);
+    Route::post('/tournament/{id}/stop-recruiting', [TournamentController::class, 'stopRecruiting']);
+    Route::post('/tournament/{id}/start-recruiting', [TournamentController::class, 'startRecruiting']);
+
+
 });
 
 Route::middleware('auth')->group(function () {
