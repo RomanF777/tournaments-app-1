@@ -110,17 +110,22 @@ class TournamentController extends Controller
 
 
     public function follow(Request $request, $id)
-    {
+{
     $tournament = Tournament::findOrFail($id);
 
     // Add the authenticated user as a participant
     $tournament->participants()->syncWithoutDetaching(auth()->id());
 
+    // Return the full list of participants
     return response()->json([
         'message' => 'Successfully followed the tournament',
+        'participants' => $tournament->participants->map(function ($participant) {
+            return ['id' => $participant->id, 'name' => $participant->name];
+        }),
         'participant_count' => $tournament->participants()->count(),
     ]);
-    }
+}
+
 
 
 }

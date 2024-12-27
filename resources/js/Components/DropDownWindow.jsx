@@ -21,13 +21,18 @@ export const DropDownWindow = ({ name, description, type, isOpen, participants=[
         }
         </div>
         <div className="dropDownWindow-component-participants">
-          <h3>Participants:</h3>
-          <ul>
-              {participants.map((participant) => (
-                  <li key={participant.id}>{participant.name}</li>
-              ))}
-          </ul>
-      </div>
+    <h3>Participants:</h3>
+      <ul>
+        {participants.length > 0 ? (
+            participants.map((participant) => (
+                <li key={participant.id}>{participant.name}</li>
+            ))
+        ) : (
+            <li>No participants yet.</li>
+        )}
+      </ul>
+    </div>
+
     </div>
   );
 };

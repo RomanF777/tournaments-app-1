@@ -10,9 +10,10 @@ export const Tournament = ({ tournament, onDelete }) => {
 
   const creatorName = user_id;
 
-  const [participantsCount, setParticipantsCount] = useState(0);
-
+  const [follow, setFollow] = useState(false);
+  const [participantsCount, setParticipantsCount] = useState(participants.length);
   const [dropDown, setDropDown] = useState(false);
+  const [participantsList, setParticipantsList] = useState(participants);  // Use initial participants
 
   const toggleDropDown = () => {
     setDropDown(!dropDown);
@@ -38,23 +39,30 @@ export const Tournament = ({ tournament, onDelete }) => {
   const handleFollow = async () => {
     try {
         const response = await axios.post(`/tournament/${id}/follow`);
+
+        // Use the returned list of participants
+        const updatedParticipants = response.data.participants;
+        setFollow(true);
+        // Update participants list with the full list of participants
+        setParticipantsList(updatedParticipants);
+
+        // Optionally update participant count
+        setParticipantsCount(response.data.participant_count);
+
         alert(response.data.message);
 
-        // Optionally update UI to reflect participant count
-        setParticipantsCount(response.data.participant_count);
     } catch (error) {
         console.error('Error following tournament:', error);
         alert('An error occurred while following the tournament.');
     }
-  };
+};
 
 
   return (
     <div className="tournament-component-dropDownWindow-component">
       <div className="tournament-component">
         <div id="left">
-          {/* !!!!! */}
-        <p>Participants: {participantsCount}</p>
+          <p>Participants: {participantsCount}</p>
           <div className="tournament-component-title">
             <h2>{name.toUpperCase()}</h2>
           </div>
@@ -73,10 +81,10 @@ export const Tournament = ({ tournament, onDelete }) => {
         <div id="right">
           <div className="tournament-component-creator">
             {/* Conditional rendering based on isAdmin */}
-              <div className="button-container">
-                {isAdmin && (<button onClick={handleDeleteTournament} style={{display: 'block'}}>Delete Tournament</button>)}
-                <button onClick={handleFollow} style={{display: 'block'}}>Follow the Tournament</button>
-              </div>
+            <div className="button-container">
+              {isAdmin && (<button onClick={handleDeleteTournament} style={{display: 'block'}}>Delete Tournament</button>)}
+              <button onClick={handleFollow} style={{display: 'block'}}>{follow ? 'Leave' : 'Follow the Tournament'}</button>
+            </div>
             <h4>
               <span className="bold">Created by<br /></span>{user_name}
             </h4>
@@ -90,15 +98,13 @@ export const Tournament = ({ tournament, onDelete }) => {
           </button>
         </div>
       </div>
-      {/* <DropDownWindow name={name} description={description} type={type} isOpen={dropDown} /> */}
       <DropDownWindow
         name={name}
         description={description}
         type={type}
         isOpen={dropDown}
-        participants={participants || []}
+        participants={participantsList}  // Pass updated participants list
     />
-
     </div>
   );
 };
