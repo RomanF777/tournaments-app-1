@@ -5,7 +5,7 @@ import { usePage } from '@inertiajs/react';
 import { IoMdArrowDropdownCircle, IoMdArrowDropupCircle } from "react-icons/io";
 
 export const Tournament = ({ tournament, onDelete }) => {
-  const { 12id, user_name, user_id, name, type, novus_type, isAdmin, description } = tournament;
+  const { id, user_name, user_id, name, type, novus_type, isAdmin, description } = tournament;
   const typeOfTheGame = type.slice(0, 1).toUpperCase() + type.slice(1);
 
   const creatorName = user_id;
