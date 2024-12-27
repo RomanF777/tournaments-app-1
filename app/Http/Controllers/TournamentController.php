@@ -108,17 +108,3 @@ class TournamentController extends Controller
     }
 
 }
-
-
-// CREATE TABLE tournaments (
-//     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-//     user_id VARCHAR(255) NOT NULL,
-//     name VARCHAR(255) NOT NULL,
-//     type ENUM('novus', 'chess', 'cards') NOT NULL,
-//     description TEXT NULL,
-//     novus_type ENUM('hybrid-tournament', 'with-bye-round') NULL,
-//     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-//     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-// );
-
-// ALTER TABLE tournaments MODIFY description VARCHAR(333) NULL;

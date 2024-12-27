@@ -5,14 +5,10 @@ import { usePage } from '@inertiajs/react';
 import { IoMdArrowDropdownCircle, IoMdArrowDropupCircle } from "react-icons/io";
 
 export const Tournament = ({ tournament, onDelete }) => {
-  const { id, user_name, user_id, name, type, novus_type, isAdmin, description } = tournament;
+  const { 12id, user_name, user_id, name, type, novus_type, isAdmin, description } = tournament;
   const typeOfTheGame = type.slice(0, 1).toUpperCase() + type.slice(1);
 
   const creatorName = user_id;
-
-  const creator = () => {
-
-  }
 
   const [dropDown, setDropDown] = useState(false);
 
@@ -37,6 +33,10 @@ export const Tournament = ({ tournament, onDelete }) => {
     }
   };
 
+  const handleFollow = () => {
+    console.log(user_name)
+  }
+
   return (
     <div className="tournament-component-dropDownWindow-component">
       <div className="tournament-component">
@@ -59,12 +59,10 @@ export const Tournament = ({ tournament, onDelete }) => {
         <div id="right">
           <div className="tournament-component-creator">
             {/* Conditional rendering based on isAdmin */}
-            {isAdmin && (
               <div className="button-container">
-                <button style={{display: 'block'}}>Delete Tournament</button>
-                <button style={{display: 'block'}} onClick={handleDeleteTournament}>Follow the Tournament</button>
+                {isAdmin && (<button onClick={handleDeleteTournament} style={{display: 'block'}}>Delete Tournament</button>)}
+                <button onClick={handleFollow} style={{display: 'block'}}>Follow the Tournament</button>
               </div>
-            )}
             <h4>
               <span className="bold">Created by<br /></span>{user_name}
             </h4>

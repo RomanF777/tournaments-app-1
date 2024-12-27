@@ -20,6 +20,9 @@ export const DropDownWindow = ({ name, description, type, isOpen }) => {
           <p className="dropDownWindow-component-description"><span style={{fontWeight: '900', fontSize: '1.1rem'}}>Description: </span>{description}</p>
         }
         </div>
+        <div className='dropDownWindow-component-participants'>
+            
+        </div>
     </div>
   );
 };
