@@ -50,26 +50,27 @@ class TournamentController extends Controller
     // }
 
     public function index()
-{
-    // Retrieve all tournaments with the user information
-    $tournaments = Tournament::with('user')->get();
+    {
+        $tournaments = Tournament::with('participants')->get();
+        $user = Auth::user();
 
-    $user = Auth::user();
-
-    return Inertia::render('Tournaments', [
-        'tournaments' => $tournaments->map(function ($tournament) use ($user) {
-            return [
-                'id' => $tournament->id,
-                'name' => $tournament->name,
-                'type' => $tournament->type,
-                'novus_type' => $tournament->novus_type,
-                'description' => $tournament->description,
-                'user_name' => $tournament->user->name ?? null, // Get the user's name
-                'isAdmin' => $user->id === $tournament->user_id, // Check admin status
-            ];
-        }),
-    ]);
-}
+        return Inertia::render('Tournaments', [
+            'tournaments' => $tournaments->map(function ($tournament) use ($user) {
+                return [
+                    'id' => $tournament->id,
+                    'name' => $tournament->name,
+                    'type' => $tournament->type,
+                    'novus_type' => $tournament->novus_type,
+                    'description' => $tournament->description,
+                    'user_name' => $tournament->user->name ?? null,
+                    'participants' => $tournament->participants->map(function ($participant) {
+                        return ['id' => $participant->id, 'name' => $participant->name];
+                    }),
+                    'isAdmin' => $user->id === $tournament->user_id,
+                ];
+            }),
+        ]);
+    }
 
 
     // Show specific tournament
@@ -106,5 +107,20 @@ class TournamentController extends Controller
 
     return response()->json(['message' => 'Tournament deleted successfully']);
     }
+
+
+    public function follow(Request $request, $id)
+    {
+    $tournament = Tournament::findOrFail($id);
+
+    // Add the authenticated user as a participant
+    $tournament->participants()->syncWithoutDetaching(auth()->id());
+
+    return response()->json([
+        'message' => 'Successfully followed the tournament',
+        'participant_count' => $tournament->participants()->count(),
+    ]);
+    }
+
 
 }

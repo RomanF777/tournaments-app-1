@@ -24,5 +24,11 @@ class Tournament extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**Rename 'tournament_user' */
+    public function participants()
+    {
+    return $this->belongsToMany(User::class, 'tournament_user');
+    }
 }
 

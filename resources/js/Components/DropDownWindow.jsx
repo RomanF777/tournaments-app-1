@@ -1,7 +1,7 @@
 import '../../css/tournaments.css';
 import { tournaments_game_descriptions } from '../../js/data';
 
-export const DropDownWindow = ({ name, description, type, isOpen }) => {
+export const DropDownWindow = ({ name, description, type, isOpen, participants=[] }) => {
   const aboutTitle = tournaments_game_descriptions.find(
     (item) => item.gameType === type
   )?.name;
@@ -20,9 +20,14 @@ export const DropDownWindow = ({ name, description, type, isOpen }) => {
           <p className="dropDownWindow-component-description"><span style={{fontWeight: '900', fontSize: '1.1rem'}}>Description: </span>{description}</p>
         }
         </div>
-        <div className='dropDownWindow-component-participants'>
-            
-        </div>
+        <div className="dropDownWindow-component-participants">
+          <h3>Participants:</h3>
+          <ul>
+              {participants.map((participant) => (
+                  <li key={participant.id}>{participant.name}</li>
+              ))}
+          </ul>
+      </div>
     </div>
   );
 };

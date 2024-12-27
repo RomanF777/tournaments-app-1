@@ -45,4 +45,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**Rename 'tournament_user' */
+    public function tournaments()
+    {
+    return $this->belongsToMany(Tournament::class, 'tournament_user');
+    }
 }

@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
 
 // Tournament routes
 Route::post('/tournament', [TournamentController::class, 'store']);
+Route::post('/tournament/{id}/follow', [TournamentController::class, 'follow']);
 Route::delete('/tournament/{id}', [TournamentController::class, 'destroy']);
 
 

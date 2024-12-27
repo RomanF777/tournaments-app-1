@@ -5,10 +5,12 @@ import { usePage } from '@inertiajs/react';
 import { IoMdArrowDropdownCircle, IoMdArrowDropupCircle } from "react-icons/io";
 
 export const Tournament = ({ tournament, onDelete }) => {
-  const { id, user_name, user_id, name, type, novus_type, isAdmin, description } = tournament;
+  const { id, user_name, user_id, name, type, novus_type, isAdmin, description, participants } = tournament;
   const typeOfTheGame = type.slice(0, 1).toUpperCase() + type.slice(1);
 
   const creatorName = user_id;
+
+  const [participantsCount, setParticipantsCount] = useState(0);
 
   const [dropDown, setDropDown] = useState(false);
 
@@ -33,14 +35,26 @@ export const Tournament = ({ tournament, onDelete }) => {
     }
   };
 
-  const handleFollow = () => {
-    console.log(user_name)
-  }
+  const handleFollow = async () => {
+    try {
+        const response = await axios.post(`/tournament/${id}/follow`);
+        alert(response.data.message);
+
+        // Optionally update UI to reflect participant count
+        setParticipantsCount(response.data.participant_count);
+    } catch (error) {
+        console.error('Error following tournament:', error);
+        alert('An error occurred while following the tournament.');
+    }
+  };
+
 
   return (
     <div className="tournament-component-dropDownWindow-component">
       <div className="tournament-component">
         <div id="left">
+          {/* !!!!! */}
+        <p>Participants: {participantsCount}</p>
           <div className="tournament-component-title">
             <h2>{name.toUpperCase()}</h2>
           </div>
@@ -76,7 +90,15 @@ export const Tournament = ({ tournament, onDelete }) => {
           </button>
         </div>
       </div>
-      <DropDownWindow name={name} description={description} type={type} isOpen={dropDown} />
+      {/* <DropDownWindow name={name} description={description} type={type} isOpen={dropDown} /> */}
+      <DropDownWindow
+        name={name}
+        description={description}
+        type={type}
+        isOpen={dropDown}
+        participants={participants || []}
+    />
+
     </div>
   );
 };
