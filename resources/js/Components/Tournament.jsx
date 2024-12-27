@@ -38,24 +38,22 @@ export const Tournament = ({ tournament, onDelete }) => {
 
   const handleFollow = async () => {
     try {
-        const response = await axios.post(`/tournament/${id}/follow`);
+      const response = await axios.post(`/tournament/${id}/follow`);
 
-        // Use the returned list of participants
-        const updatedParticipants = response.data.participants;
-        setFollow(true);
-        // Update participants list with the full list of participants
-        setParticipantsList(updatedParticipants);
+      const updatedParticipants = response.data.participants;
+      setParticipantsList(updatedParticipants);
+      setParticipantsCount(response.data.participant_count);
 
-        // Optionally update participant count
-        setParticipantsCount(response.data.participant_count);
+      // Toggle follow state
+      setFollow(!follow); // Switch between Follow and Leave
 
-        alert(response.data.message);
-
+      alert(response.data.message);
     } catch (error) {
-        console.error('Error following tournament:', error);
-        alert('An error occurred while following the tournament.');
+      console.error('Error following/leaving the tournament:', error);
+      alert('An error occurred while following the tournament.');
     }
-};
+  };
+
 
 
   return (
@@ -83,7 +81,7 @@ export const Tournament = ({ tournament, onDelete }) => {
             {/* Conditional rendering based on isAdmin */}
             <div className="button-container">
               {isAdmin && (<button onClick={handleDeleteTournament} style={{display: 'block'}}>Delete Tournament</button>)}
-              <button onClick={handleFollow} style={{display: 'block'}}>{follow ? 'Leave' : 'Follow the Tournament'}</button>
+              <button onClick={handleFollow} style={{ display: 'block' }}>{follow ? 'Leave the tournament' : 'Follow the Tournament'}</button>
             </div>
             <h4>
               <span className="bold">Created by<br /></span>{user_name}

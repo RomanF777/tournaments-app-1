@@ -110,21 +110,38 @@ class TournamentController extends Controller
 
 
     public function follow(Request $request, $id)
-{
-    $tournament = Tournament::findOrFail($id);
+    {
+        $tournament = Tournament::findOrFail($id);
+        $userId = auth()->id();
 
-    // Add the authenticated user as a participant
-    $tournament->participants()->syncWithoutDetaching(auth()->id());
+        // Check if the user is already a participant
+        $isParticipant = $tournament->participants()->where('user_id', $userId)->exists();
 
-    // Return the full list of participants
-    return response()->json([
-        'message' => 'Successfully followed the tournament',
-        'participants' => $tournament->participants->map(function ($participant) {
-            return ['id' => $participant->id, 'name' => $participant->name];
-        }),
-        'participant_count' => $tournament->participants()->count(),
-    ]);
-}
+        if ($isParticipant) {
+            // If the user is already a participant, remove them (leave the tournament)
+            $tournament->participants()->detach($userId);
+
+            return response()->json([
+                'message' => 'Successfully left the tournament',
+                'participants' => $tournament->participants->map(function ($participant) {
+                    return ['id' => $participant->id, 'name' => $participant->name];
+                }),
+                'participant_count' => $tournament->participants()->count(),
+            ]);
+        } else {
+            // Otherwise, add the user as a participant
+            $tournament->participants()->syncWithoutDetaching($userId);
+
+            return response()->json([
+                'message' => 'Successfully followed the tournament',
+                'participants' => $tournament->participants->map(function ($participant) {
+                    return ['id' => $participant->id, 'name' => $participant->name];
+                }),
+                'participant_count' => $tournament->participants()->count(),
+            ]);
+        }
+    }
+
 
 
 
