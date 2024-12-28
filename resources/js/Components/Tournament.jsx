@@ -78,6 +78,10 @@ export const Tournament = ({ tournament, onDelete }) => {
     }
   };
 
+  const startTheGame = () => {
+    
+  }
+
   return (
     <div className="tournament-component-dropDownWindow-component">
       <div className="tournament-component">
@@ -116,8 +120,9 @@ export const Tournament = ({ tournament, onDelete }) => {
                   {follow ? 'Leave the tournament' : 'Follow the Tournament'}
                 </button>
               ) : (
-                <p>Recruiting has been stopped.</p> // Replace button with a message or nothing
+                <p>Recruiting has been stopped.</p>
               )}
+              {isAdmin && !isRecruiting && (<button onClick={startTheGame}>Start The Game</button>)}
             </div>
             <h4>
               <span className="bold">Created by<br /></span>{user_name}
