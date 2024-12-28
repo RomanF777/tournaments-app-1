@@ -79,8 +79,8 @@ export const Tournament = ({ tournament, onDelete }) => {
   };
 
   const startTheGame = () => {
-    
-  }
+    window.location.href = `/tournament/${id}`;
+  };
 
   return (
     <div className="tournament-component-dropDownWindow-component">
@@ -147,4 +147,5 @@ export const Tournament = ({ tournament, onDelete }) => {
     </div>
   );
 };
+
 

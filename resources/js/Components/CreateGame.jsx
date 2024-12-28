@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Inertia } from '@inertiajs/inertia'
 
 // Set default Axios configuration
-axios.defaults.baseURL = 'http://tournaments.test/'; // Replace with your API base URL
+axios.defaults.baseURL = '/'; // Replace with your API base URL
 // axios.defaults.withCredentials = true; // Enable cookies if needed
 
 export const CreateGame = () => {
