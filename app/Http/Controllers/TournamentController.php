@@ -62,6 +62,7 @@ class TournamentController extends Controller
                     'type' => $tournament->type,
                     'novus_type' => $tournament->novus_type,
                     'description' => $tournament->description,
+                    'unique_path' => $tournament->unique_path,
                     'user_name' => $tournament->user->name ?? null,
                     'participants' => $tournament->participants->map(function ($participant) {
                         return ['id' => $participant->id, 'name' => $participant->name];
@@ -144,8 +145,27 @@ class TournamentController extends Controller
 
 
 
+    public function startGame(Request $request)
+    {
+        $tournament = Tournament::findOrFail($request->input('id'));
+
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        return redirect()->route('game.show', ['path' => $tournament->unique_path]);
+    }
 
 
+
+    public function showGame($path)
+    {
+        $tournament = Tournament::where('unique_path', $path)->firstOrFail();
+
+        return Inertia::render('GamePage', [
+            'tournament' => $tournament,
+        ]);
+    }
 
 
 
@@ -182,7 +202,5 @@ class TournamentController extends Controller
 
             return response()->json(['message' => 'Recruiting started successfully']);
         }
-
-
 
 }

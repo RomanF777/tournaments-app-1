@@ -1,5 +1,6 @@
 import '../../css/tournaments.css';
 import { tournaments_game_descriptions } from '../../js/data';
+import { ReadMore } from './ReadMore';
 
 export const DropDownWindow = ({ name, description, type, isOpen, participants=[] }) => {
   const aboutTitle = tournaments_game_descriptions.find(
@@ -13,11 +14,11 @@ export const DropDownWindow = ({ name, description, type, isOpen, participants=[
     <div className={`dropDownWindow-component ${isOpen ? 'open' : ''}`}>
       <div className="dropDownWindow-component-description">
         {aboutTitle ? <h1 style={{fontWeight: '900', fontSize: '1.4rem'}}>{aboutTitle}</h1> : null}
-        {descriptionOfTheGame ? <p>{descriptionOfTheGame}</p> : <p>No description available!</p>}
+        {descriptionOfTheGame ? <ReadMore limit='100'>{descriptionOfTheGame}</ReadMore>: <p>No description available!</p>}
       </div>
       <div>
         {description &&
-          <p className="dropDownWindow-component-description"><span style={{fontWeight: '900', fontSize: '1.1rem'}}>Description: </span>{description}</p>
+          <span className="dropDownWindow-component-description"><span style={{fontWeight: '900', fontSize: '1.1rem'}}>Description: </span><ReadMore limit='52'>{description}</ReadMore></span>
         }
         </div>
         <div className="dropDownWindow-component-participants">

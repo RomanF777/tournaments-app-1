@@ -56,9 +56,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/tournament/{id}', [TournamentController::class, 'show'])->name('tournament.show');
+// Route::get('/tournament/{id}', [TournamentController::class, 'show'])->name('tournament.show');
 
-// Tournament routes
+// Tournament start the game routes
+Route::post('/start-game', [TournamentController::class, 'startGame'])->name('game.start');
+Route::get('/game/{path}', [TournamentController::class, 'showGame'])->name('game.show');
+
+
 Route::post('/tournament', [TournamentController::class, 'store']);
 Route::post('/tournament/{id}/follow', [TournamentController::class, 'follow']);
 Route::delete('/tournament/{id}', [TournamentController::class, 'destroy']);

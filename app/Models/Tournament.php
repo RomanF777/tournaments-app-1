@@ -15,6 +15,7 @@ class Tournament extends Model
         'type',
         'novus_type',
         'description',
+        'unique_path',
     ];
 
     /**
@@ -25,10 +26,41 @@ class Tournament extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**Rename 'tournament_user' */
+    /**
+     * Define the relationship to the participants.
+     */
     public function participants()
     {
-    return $this->belongsToMany(User::class, 'tournament_user');
+        return $this->belongsToMany(User::class, 'tournament_user');
     }
+
+    /**
+     * Boot the model.
+     */
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     static::creating(function ($tournament) {
+    //         if (empty($tournament->unique_path)) {
+    //             $tournament->unique_path = 'default_path_' . uniqid();
+    //         }
+    //     });
+    // }
+
+    protected static function boot()
+    {
+    parent::boot();
+
+    static::creating(function ($tournament) {
+        do {
+            $uniquePath = 'tournament_' . uniqid();
+        } while (Tournament::where('unique_path', $uniquePath)->exists());
+
+        $tournament->unique_path = $uniquePath;
+    });
+    }
+
 }
+
 
