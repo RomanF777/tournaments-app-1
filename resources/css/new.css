@@ -1,0 +1,19 @@
+.game-page {
+  padding: 20px;
+  color: black;
+}
+
+.bracket {
+  margin: 0 auto;
+}
+
+.seed {
+  margin: 10px 0;
+}
+
+.seed-team {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+}

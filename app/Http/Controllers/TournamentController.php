@@ -160,12 +160,22 @@ class TournamentController extends Controller
 
     public function showGame($path)
     {
-        $tournament = Tournament::where('unique_path', $path)->firstOrFail();
+        $tournament = Tournament::with('participants')->where('unique_path', $path)->firstOrFail();
 
         return Inertia::render('GamePage', [
-            'tournament' => $tournament,
+            'tournament' => [
+                'id' => $tournament->id,
+                'name' => $tournament->name,
+                'participants' => $tournament->participants->map(function ($participant) {
+                    return [
+                        'id' => $participant->id,
+                        'name' => $participant->name,
+                    ];
+                }),
+            ],
         ]);
     }
+
 
 
 
