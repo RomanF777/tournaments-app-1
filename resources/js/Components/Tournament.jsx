@@ -10,7 +10,7 @@ export const Tournament = ({ tournament, onDelete }) => {
   const { id, user_name, user_id, name, type, novus_type, isAdmin, description, participants } = tournament;
   const typeOfTheGame = type.slice(0, 1).toUpperCase() + type.slice(1);
 
-  const [follow, setFollow] = useState(false);
+  const [follow, setFollow] = useState(()=>{});
   const [participantsCount, setParticipantsCount] = useState(participants.length);
   const [dropDown, setDropDown] = useState(false);
   const [participantsList, setParticipantsList] = useState(participants);
@@ -25,8 +25,20 @@ export const Tournament = ({ tournament, onDelete }) => {
         console.error('Error fetching recruiting status:', error);
       }
     };
+
+    const fetchFollowStatus = async () => {
+      try {
+        const response = await axios.get(`/tournament/${id}/follow-status`);
+        setFollow(response.data.isFollowing);
+      } catch (error) {
+        console.error('Error fetching follow status:', error);
+      }
+    };
+
     fetchRecruitingStatus();
+    fetchFollowStatus();
   }, [id]);
+
 
   const toggleDropDown = () => {
     setDropDown(!dropDown);

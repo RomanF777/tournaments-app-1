@@ -64,6 +64,8 @@ Route::get('/game/{path}', [TournamentController::class, 'showGame'])->name('gam
 
 
 Route::post('/tournament', [TournamentController::class, 'store']);
+
+Route::get('/tournament/{id}/follow-status', [TournamentController::class, 'getFollowStatus']);
 Route::post('/tournament/{id}/follow', [TournamentController::class, 'follow']);
 Route::delete('/tournament/{id}', [TournamentController::class, 'destroy']);
 

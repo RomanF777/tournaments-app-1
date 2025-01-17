@@ -34,20 +34,6 @@ class Tournament extends Model
         return $this->belongsToMany(User::class, 'tournament_user');
     }
 
-    /**
-     * Boot the model.
-     */
-    // protected static function boot()
-    // {
-    //     parent::boot();
-
-    //     static::creating(function ($tournament) {
-    //         if (empty($tournament->unique_path)) {
-    //             $tournament->unique_path = 'default_path_' . uniqid();
-    //         }
-    //     });
-    // }
-
     protected static function boot()
     {
     parent::boot();

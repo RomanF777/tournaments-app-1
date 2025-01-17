@@ -213,4 +213,15 @@ class TournamentController extends Controller
             return response()->json(['message' => 'Recruiting started successfully']);
         }
 
+
+
+        public function getFollowStatus($id)
+        {
+            $tournament = Tournament::findOrFail($id);
+            $isFollowing = $tournament->participants()->where('user_id', auth()->id())->exists();
+
+            return response()->json(['isFollowing' => $isFollowing]);
+        }
+
+
 }
