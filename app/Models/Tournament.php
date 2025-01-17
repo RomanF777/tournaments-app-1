@@ -35,17 +35,11 @@ class Tournament extends Model
 
     protected static function boot()
     {
-    parent::boot();
+        parent::boot();
 
-    static::creating(function ($tournament) {
-        do {
-            $uniquePath = 'tournament_' . uniqid();
-        } while (Tournament::where('unique_path', $uniquePath)->exists());
-
-        $tournament->unique_path = $uniquePath;
-    });
+        // Remove the unique path generation if you want to rely on the default auto-incrementing ID
+        // Commenting or removing this section entirely
     }
-
 }
 
 

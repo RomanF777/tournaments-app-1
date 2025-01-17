@@ -12,21 +12,18 @@ class TournamentController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            // 'user' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|in:novus,chess,cards',
             'novus_type' => 'nullable|string|in:hybrid-tournament,with-bye-round',
             'description' => 'nullable|string',
         ]);
 
-        // $tournament = Tournament::create($validatedData);
-        // Associate the tournament with the authenticated user's ID.
         $tournament = Tournament::create([
             'name' => $validatedData['name'],
             'type' => $validatedData['type'],
             'novus_type' => $validatedData['novus_type'],
             'description' => $validatedData['description'],
-            'user_id' => auth()->id(), // Ensure user_id is set correctly
+            'user_id' => auth()->id(),
         ]);
 
         return response()->json([
@@ -34,20 +31,6 @@ class TournamentController extends Controller
             'tournament' => $tournament,
         ], 201);
     }
-
-    // public function index()
-    // {
-    // $tournaments = Tournament::all();
-    // $user = Auth::user();
-
-    // return Inertia::render('Tournaments', [
-    //     'tournaments' => $tournaments->map(function ($tournament) use ($user) {
-    //         // Check if the user is the creator (admin)
-    //         $tournament->isAdmin = $user->id === $tournament->user_id;
-    //         return $tournament;
-    //     }),
-    // ]);
-    // }
 
     public function index()
     {
@@ -62,7 +45,6 @@ class TournamentController extends Controller
                     'type' => $tournament->type,
                     'novus_type' => $tournament->novus_type,
                     'description' => $tournament->description,
-                    'unique_path' => $tournament->unique_path,
                     'user_name' => $tournament->user->name ?? null,
                     'participants' => $tournament->participants->map(function ($participant) {
                         return ['id' => $participant->id, 'name' => $participant->name];
@@ -73,53 +55,39 @@ class TournamentController extends Controller
         ]);
     }
 
-
-    // Show specific tournament
     public function show($id)
     {
-        // Get the current logged-in user
         $user = Auth::user();
-
-        // Find the tournament by ID
         $tournament = Tournament::findOrFail($id);
-
-        // Check if the logged-in user is the creator (admin) of the tournament
         $isAdmin = ($user->id === $tournament->user_id);
 
-        // Return the tournament data along with the isAdmin flag to the frontend (Inertia.js view)
         return Inertia::render('TournamentDetails', [
             'tournament' => $tournament,
-            'isAdmin' => $isAdmin, // Pass the admin status to the view
+            'isAdmin' => $isAdmin,
         ]);
     }
 
-
     public function destroy($id)
     {
-    $tournament = Tournament::findOrFail($id);
+        $tournament = Tournament::findOrFail($id);
 
-    // Check if the user is the creator of the tournament
-    if (auth()->id() !== $tournament->user_id) {
-        return response()->json(['message' => 'Unauthorized'], 403);
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $tournament->delete();
+
+        return response()->json(['message' => 'Tournament deleted successfully']);
     }
-
-    // Proceed with deletion
-    $tournament->delete();
-
-    return response()->json(['message' => 'Tournament deleted successfully']);
-    }
-
 
     public function follow(Request $request, $id)
     {
         $tournament = Tournament::findOrFail($id);
         $userId = auth()->id();
 
-        // Check if the user is already a participant
         $isParticipant = $tournament->participants()->where('user_id', $userId)->exists();
 
         if ($isParticipant) {
-            // If the user is already a participant, remove them (leave the tournament)
             $tournament->participants()->detach($userId);
 
             return response()->json([
@@ -130,7 +98,6 @@ class TournamentController extends Controller
                 'participant_count' => $tournament->participants()->count(),
             ]);
         } else {
-            // Otherwise, add the user as a participant
             $tournament->participants()->syncWithoutDetaching($userId);
 
             return response()->json([
@@ -142,8 +109,6 @@ class TournamentController extends Controller
             ]);
         }
     }
-
-
 
     public function startGame(Request $request)
     {
@@ -157,11 +122,8 @@ class TournamentController extends Controller
             return response()->json(['message' => 'The game cannot start with less than 2 participants.'], 400);
         }
 
-        return redirect()->route('game.show', ['path' => $tournament->unique_path]);
+        return redirect()->route('game.show', ['id' => $tournament->id]);
     }
-
-
-
 
     public function showGame($id)
     {
@@ -181,52 +143,45 @@ class TournamentController extends Controller
         ]);
     }
 
+    public function getRecruitingStatus($id)
+    {
+        $tournament = Tournament::findOrFail($id);
+        return response()->json(['isRecruiting' => $tournament->is_recruiting]);
+    }
 
+    public function stopRecruiting($id)
+    {
+        $tournament = Tournament::findOrFail($id);
 
-
-        public function getRecruitingStatus($id)
-        {
-            $tournament = Tournament::findOrFail($id);
-            return response()->json(['isRecruiting' => $tournament->is_recruiting]);
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        public function stopRecruiting($id)
-        {
-            $tournament = Tournament::findOrFail($id);
+        $tournament->is_recruiting = false;
+        $tournament->save();
 
-            if (auth()->id() !== $tournament->user_id) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
+        return response()->json(['message' => 'Recruiting stopped successfully']);
+    }
 
-            $tournament->is_recruiting = false;
-            $tournament->save();
+    public function startRecruiting($id)
+    {
+        $tournament = Tournament::findOrFail($id);
 
-            return response()->json(['message' => 'Recruiting stopped successfully']);
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        public function startRecruiting($id)
-        {
-            $tournament = Tournament::findOrFail($id);
+        $tournament->is_recruiting = true;
+        $tournament->save();
 
-            if (auth()->id() !== $tournament->user_id) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
+        return response()->json(['message' => 'Recruiting started successfully']);
+    }
 
-            $tournament->is_recruiting = true;
-            $tournament->save();
+    public function getFollowStatus($id)
+    {
+        $tournament = Tournament::findOrFail($id);
+        $isFollowing = $tournament->participants()->where('user_id', auth()->id())->exists();
 
-            return response()->json(['message' => 'Recruiting started successfully']);
-        }
-
-
-
-        public function getFollowStatus($id)
-        {
-            $tournament = Tournament::findOrFail($id);
-            $isFollowing = $tournament->participants()->where('user_id', auth()->id())->exists();
-
-            return response()->json(['isFollowing' => $isFollowing]);
-        }
-
-
+        return response()->json(['isFollowing' => $isFollowing]);
+    }
 }
