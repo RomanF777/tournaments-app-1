@@ -153,8 +153,13 @@ class TournamentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        if ($tournament->participants()->count() < 2) {
+            return response()->json(['message' => 'The game cannot start with less than 2 participants.'], 400);
+        }
+
         return redirect()->route('game.show', ['path' => $tournament->unique_path]);
     }
+
 
 
 

@@ -93,9 +93,13 @@ export const Tournament = ({ tournament, onDelete }) => {
   };
 
   const startTheGame = () => {
-    // window.location.href = `/start-game`;
-    window.location.href = `/game/${tournament.id}`;
-    };
+    if (participantsList.length < 2) {
+      alert("The game cannot start with less than 2 participants.");
+      return;
+    }
+    window.location.href = `/game/${id}`;
+  };
+
 
   return (
     <div className="tournament-component-dropDownWindow-component">
