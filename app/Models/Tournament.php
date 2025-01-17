@@ -15,7 +15,6 @@ class Tournament extends Model
         'type',
         'novus_type',
         'description',
-        'unique_path',
     ];
 
     /**

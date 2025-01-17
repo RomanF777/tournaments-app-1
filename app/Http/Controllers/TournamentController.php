@@ -158,9 +158,9 @@ class TournamentController extends Controller
 
 
 
-    public function showGame($path)
+    public function showGame($id)
     {
-        $tournament = Tournament::with('participants')->where('unique_path', $path)->firstOrFail();
+        $tournament = Tournament::with('participants')->findOrFail($id);
 
         return Inertia::render('GamePage', [
             'tournament' => [

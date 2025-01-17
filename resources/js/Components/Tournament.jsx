@@ -94,7 +94,7 @@ export const Tournament = ({ tournament, onDelete }) => {
 
   const startTheGame = () => {
     // window.location.href = `/start-game`;
-    window.location.href = `/game/${tournament.unique_path}`;
+    window.location.href = `/game/${tournament.id}`;
     };
 
   return (
