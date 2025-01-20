@@ -137,6 +137,7 @@ class TournamentController extends Controller
                     return [
                         'id' => $participant->id,
                         'name' => $participant->name,
+                        
                     ];
                 }),
             ],
@@ -183,5 +184,25 @@ class TournamentController extends Controller
         $isFollowing = $tournament->participants()->where('user_id', auth()->id())->exists();
 
         return response()->json(['isFollowing' => $isFollowing]);
+    }
+
+    public function updateBracket(Request $request, $id)
+    {
+        $tournament = Tournament::findOrFail($id);
+
+        // Check if the current user is the admin of the tournament
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'bracketData' => 'required|json',
+        ]);
+
+        $tournament->update([
+            'bracket_data' => $validated['bracketData'],
+        ]);
+
+        return response()->json(['message' => 'Bracket updated successfully']);
     }
 }
