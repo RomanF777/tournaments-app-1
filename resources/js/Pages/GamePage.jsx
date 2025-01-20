@@ -6,7 +6,8 @@ import '../../css/new.css';
 
 const CombinedBracketPage = ({ tournament }) => {
   const [bracketData, setBracketData] = useState(tournament.bracketData || []);
-  const [isAdmin, setIsAdmin] = useState(tournament.isAdmin);
+  // const [isAdmin, setIsAdmin] = useState(tournament.user_id);
+  const isAdmin = tournament.user_id === tournament.admin_id;
 
   useEffect(() => {
     if (bracketData.length === 0) {
@@ -42,23 +43,39 @@ const CombinedBracketPage = ({ tournament }) => {
   };
 
   const handleUpdateBracket = async (updatedData) => {
+    console.log('Updated Bracket Data:', updatedData); // Log the updated bracket data
     try {
-      await axios.post(`/game/${tournament.id}/update-bracket`, { bracketData: updatedData });
-      setBracketData(updatedData);
-      alert('Bracket updated successfully!');
+      const response = await axios.post(`/game/${tournament.id}/update-bracket`, {
+        bracketData: updatedData, // Send the updated bracket
+      });
+
+      if (response.status === 200) {
+        setBracketData(updatedData); // Update state with the new bracket
+        alert('Bracket updated successfully!');
+      } else {
+        alert('Failed to update the bracket. Server did not return success.');
+      }
     } catch (error) {
       console.error('Error updating bracket:', error);
       alert('Failed to update the bracket.');
     }
   };
 
+
+
   const handleSelectWinner = (roundIndex, matchIndex, winnerId) => {
-    const updatedBracket = [...bracketData];
-    updatedBracket[roundIndex].matches[matchIndex].winner = winnerId;
+    const updatedBracket = JSON.parse(JSON.stringify(bracketData)); // Copy the current bracket
+    const match = updatedBracket[roundIndex].matches[matchIndex];
+
+    // Update the winner of the match
+    match.winner = winnerId;
+
+    // Update the bracket data
     handleUpdateBracket(updatedBracket);
   };
-  console.log('Bracket Data:', bracketData);
 
+  console.log('Bracket Data:', bracketData);
+  console.log(tournament)
   return (
     <AuthenticatedLayout>
       <div className="game-page">
@@ -101,15 +118,16 @@ const CombinedBracketPage = ({ tournament }) => {
                       </p>
                       <div>
                         {isAdmin && (
-                          <div>
-                            <button
+                          <div className='bg-gray-100 p-4 '>
+                            <button className='bg-blue-500 text-white px-4 py-2 rounded m-2'
                               onClick={() =>
                                 handleSelectWinner(roundIndex, matchIndex, match.participant1?.id)
                               }
                             >
                               Select {match.participant1?.name || 'TBD'} as Winner
                             </button>
-                            <button
+                            <br />
+                            <button className='bg-blue-500 text-white px-4 py-2 rounded m-2'
                               onClick={() =>
                                 handleSelectWinner(roundIndex, matchIndex, match.participant2?.id)
                               }

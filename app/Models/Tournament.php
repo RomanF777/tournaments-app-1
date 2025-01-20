@@ -15,6 +15,7 @@ class Tournament extends Model
         'type',
         'novus_type',
         'description',
+        'bracket_data' => 'array',
     ];
 
     /**

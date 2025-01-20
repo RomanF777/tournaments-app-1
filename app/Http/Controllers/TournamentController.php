@@ -133,11 +133,11 @@ class TournamentController extends Controller
             'tournament' => [
                 'id' => $tournament->id,
                 'name' => $tournament->name,
+                'bracketData' => $tournament->bracket_data, // Убедитесь, что это добавлено
                 'participants' => $tournament->participants->map(function ($participant) {
                     return [
                         'id' => $participant->id,
                         'name' => $participant->name,
-                        
                     ];
                 }),
             ],
@@ -186,23 +186,48 @@ class TournamentController extends Controller
         return response()->json(['isFollowing' => $isFollowing]);
     }
 
-    public function updateBracket(Request $request, $id)
+    public function updateBracket(Request $request, Tournament $tournament)
     {
-        $tournament = Tournament::findOrFail($id);
-
-        // Check if the current user is the admin of the tournament
         if (auth()->id() !== $tournament->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $validated = $request->validate([
-            'bracketData' => 'required|json',
+            'bracketData' => 'required|array', // Ensure it’s an array
         ]);
 
+        // Log the incoming data for debugging
+        \Log::info('Bracket Data Received:', $validated['bracketData']);
+
+        // Update the tournament's bracket data
         $tournament->update([
-            'bracket_data' => $validated['bracketData'],
+            'bracket_data' => $validated['bracketData'], // Store the updated bracket data
         ]);
 
-        return response()->json(['message' => 'Bracket updated successfully']);
+        return response()->json(['message' => 'Bracket updated successfully!'], 200);
     }
+
+
+    public function updateWinner(Request $request, Tournament $tournament)
+{
+    // Проверяем, что пользователь — админ турнира
+    if (auth()->id() !== $tournament->user_id) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    // Валидация входных данных
+    $validated = $request->validate([
+        'matchId' => 'required|exists:tournament_matches,id',
+        'winnerId' => 'required|exists:users,id',
+    ]);
+
+    // Обновление записи в таблице tournament_matches
+    $match = \App\Models\TournamentMatch::findOrFail($validated['matchId']);
+    $match->winner_id = $validated['winnerId'];
+    $match->save();
+
+    return response()->json(['message' => 'Winner updated successfully!'], 200);
+}
+
+
 }
