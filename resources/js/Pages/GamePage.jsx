@@ -6,7 +6,6 @@ import '../../css/new.css';
 
 const CombinedBracketPage = ({ tournament }) => {
   const [bracketData, setBracketData] = useState(tournament.bracketData || []);
-  // const [isAdmin, setIsAdmin] = useState(tournament.user_id);
   const isAdmin = tournament.user_id === tournament.admin_id;
 
   useEffect(() => {
@@ -23,11 +22,10 @@ const CombinedBracketPage = ({ tournament }) => {
     }));
 
     const rounds = Math.ceil(Math.log2(teams.length));
-    const seeds = [];
-
-    for (let i = 0; i < rounds; i++) {
-      seeds.push({ round: i + 1, matches: [] });
-    }
+    const seeds = Array.from({ length: rounds }, (_, roundIndex) => ({
+      round: roundIndex + 1,
+      matches: [],
+    }));
 
     for (let i = 0; i < teams.length; i += 2) {
       const match = {
@@ -43,14 +41,13 @@ const CombinedBracketPage = ({ tournament }) => {
   };
 
   const handleUpdateBracket = async (updatedData) => {
-    console.log('Updated Bracket Data:', updatedData); // Log the updated bracket data
     try {
       const response = await axios.post(`/game/${tournament.id}/update-bracket`, {
-        bracketData: updatedData, // Send the updated bracket
+        bracketData: updatedData,
       });
 
       if (response.status === 200) {
-        setBracketData(updatedData); // Update state with the new bracket
+        setBracketData(updatedData);
         alert('Bracket updated successfully!');
       } else {
         alert('Failed to update the bracket. Server did not return success.');
@@ -61,25 +58,38 @@ const CombinedBracketPage = ({ tournament }) => {
     }
   };
 
-
-
   const handleSelectWinner = (roundIndex, matchIndex, winnerId) => {
-    const updatedBracket = JSON.parse(JSON.stringify(bracketData)); // Copy the current bracket
+    const updatedBracket = JSON.parse(JSON.stringify(bracketData));
     const match = updatedBracket[roundIndex].matches[matchIndex];
+    if (!match) return;
 
-    // Update the winner of the match
     match.winner = winnerId;
 
-    // Update the bracket data
+    // Fill next round
+    if (roundIndex + 1 < updatedBracket.length) {
+      const nextRound = updatedBracket[roundIndex + 1];
+      const nextMatchIndex = Math.floor(matchIndex / 2);
+
+      if (!nextRound.matches[nextMatchIndex]) {
+        nextRound.matches[nextMatchIndex] = { participant1: null, participant2: null, winner: null };
+      }
+
+      const nextMatch = nextRound.matches[nextMatchIndex];
+      if (matchIndex % 2 === 0) {
+        nextMatch.participant1 = match.participant1.id === winnerId ? match.participant1 : match.participant2;
+      } else {
+        nextMatch.participant2 = match.participant1.id === winnerId ? match.participant1 : match.participant2;
+      }
+    }
+
     handleUpdateBracket(updatedBracket);
   };
 
-  console.log('Bracket Data:', bracketData);
-  console.log(tournament)
   return (
     <AuthenticatedLayout>
       <div className="game-page">
         <h1>{tournament.name} - Bracket</h1>
+
         {bracketData.length > 0 ? (
           <Bracket
             rounds={bracketData.map((round, roundIndex) => ({
@@ -110,37 +120,31 @@ const CombinedBracketPage = ({ tournament }) => {
             {bracketData.map((round, roundIndex) => (
               <div key={roundIndex}>
                 <h2>Round {round.round}</h2>
-                <div>
-                  {round.matches.map((match, matchIndex) => (
-                    <div key={matchIndex} style={{ marginBottom: '10px' }}>
+                {round.matches.map((match, matchIndex) => (
+                  <div key={matchIndex}>
+                    <p>
+                      {match.participant1?.name || 'Not specified'} vs {match.participant2?.name || 'Not specified'}
+                    </p>
+                    {match.winner && (
                       <p>
-                        {match.participant1?.name || 'TBD'} vs {match.participant2?.name || 'TBD'}
+                        <strong>Winner: </strong>
+                        {match.winner === match.participant1?.id
+                          ? match.participant1?.name
+                          : match.participant2?.name}
                       </p>
+                    )}
+                    {isAdmin && !match.winner && (
                       <div>
-                        {isAdmin && (
-                          <div className='bg-gray-100 p-4 '>
-                            <button className='bg-blue-500 text-white px-4 py-2 rounded m-2'
-                              onClick={() =>
-                                handleSelectWinner(roundIndex, matchIndex, match.participant1?.id)
-                              }
-                            >
-                              Select {match.participant1?.name || 'TBD'} as Winner
-                            </button>
-                            <br />
-                            <button className='bg-blue-500 text-white px-4 py-2 rounded m-2'
-                              onClick={() =>
-                                handleSelectWinner(roundIndex, matchIndex, match.participant2?.id)
-                              }
-                            >
-                              Select {match.participant2?.name || 'TBD'} as Winner
-                            </button>
-                          </div>
-                        )}
-                        <p>Winner: {match.winner ? `Participant ${match.winner}` : 'TBD'}</p>
+                        <button onClick={() => handleSelectWinner(roundIndex, matchIndex, match.participant1?.id)}>
+                          {match.participant1?.name}
+                        </button>
+                        <button onClick={() => handleSelectWinner(roundIndex, matchIndex, match.participant2?.id)}>
+                          {match.participant2?.name}
+                        </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                ))}
               </div>
             ))}
           </div>

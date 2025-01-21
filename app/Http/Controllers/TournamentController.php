@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Tournament;
 use Inertia\Inertia;
-
+use App\Models\TournamentMatch;
 class TournamentController extends Controller
 {
     public function store(Request $request)
@@ -110,6 +110,7 @@ class TournamentController extends Controller
         }
     }
 
+
     public function startGame(Request $request)
     {
         $tournament = Tournament::findOrFail($request->input('id'));
@@ -118,12 +119,26 @@ class TournamentController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        if ($tournament->participants()->count() < 2) {
+        $participants = $tournament->participants()->get();
+        if ($participants->count() < 2) {
             return response()->json(['message' => 'The game cannot start with less than 2 participants.'], 400);
         }
 
-        return redirect()->route('game.show', ['id' => $tournament->id]);
+        // Генерация первого раунда
+        $matches = [];
+        $shuffledParticipants = $participants->shuffle();
+        for ($i = 0; $i < $shuffledParticipants->count(); $i += 2) {
+            $matches[] = TournamentMatch::create([
+                'tournament_id' => $tournament->id,
+                'round' => 1,
+                'participant1_id' => $shuffledParticipants[$i]->id,
+                'participant2_id' => $shuffledParticipants[$i + 1]->id ?? null, // Если нечетное число участников
+            ]);
+        }
+
+        return response()->json(['message' => 'Game started successfully', 'matches' => $matches]);
     }
+
 
     public function showGame($id)
     {
@@ -209,25 +224,61 @@ class TournamentController extends Controller
 
 
     public function updateWinner(Request $request, Tournament $tournament)
-{
-    // Проверяем, что пользователь — админ турнира
-    if (auth()->id() !== $tournament->user_id) {
-        return response()->json(['message' => 'Unauthorized'], 403);
+    {
+        // Проверяем, что пользователь — админ турнира
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Валидация входных данных
+        $validated = $request->validate([
+            'matchId' => 'required|exists:tournament_matches,id',
+            'winnerId' => 'required|exists:users,id',
+        ]);
+
+        // Обновление записи в таблице tournament_matches
+        $match = \App\Models\TournamentMatch::findOrFail($validated['matchId']);
+        $match->winner_id = $validated['winnerId'];
+        $match->save();
+
+        return response()->json(['message' => 'Winner updated successfully!'], 200);
     }
 
-    // Валидация входных данных
-    $validated = $request->validate([
-        'matchId' => 'required|exists:tournament_matches,id',
-        'winnerId' => 'required|exists:users,id',
-    ]);
 
-    // Обновление записи в таблице tournament_matches
-    $match = \App\Models\TournamentMatch::findOrFail($validated['matchId']);
-    $match->winner_id = $validated['winnerId'];
-    $match->save();
+    public function advanceRound(Request $request, Tournament $tournament)
+    {
+        if (auth()->id() !== $tournament->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
-    return response()->json(['message' => 'Winner updated successfully!'], 200);
-}
+        $currentRound = TournamentMatch::where('tournament_id', $tournament->id)->max('round');
+        $matches = TournamentMatch::where('tournament_id', $tournament->id)
+            ->where('round', $currentRound)
+            ->get();
+
+        // Проверяем, что все победители выбраны
+        foreach ($matches as $match) {
+            if (!$match->winner_id) {
+                return response()->json(['message' => 'All matches must have a winner before advancing.'], 400);
+            }
+        }
+
+        // Генерация следующего раунда
+        $nextRound = $currentRound + 1;
+        $winners = $matches->map(fn($match) => $match->winner_id);
+        $newMatches = [];
+        for ($i = 0; $i < $winners->count(); $i += 2) {
+            $newMatches[] = TournamentMatch::create([
+                'tournament_id' => $tournament->id,
+                'round' => $nextRound,
+                'participant1_id' => $winners[$i],
+                'participant2_id' => $winners[$i + 1] ?? null,
+            ]);
+        }
+
+        return response()->json(['message' => 'Round advanced successfully', 'matches' => $newMatches]);
+    }
+
 
 
 }

@@ -11,10 +11,10 @@ class TournamentMatch extends Model
 
     protected $fillable = [
         'tournament_id',
+        'round',
         'participant1_id',
         'participant2_id',
         'winner_id',
-        'round',
     ];
 
     public function tournament()
@@ -36,5 +36,4 @@ class TournamentMatch extends Model
     {
         return $this->belongsTo(User::class, 'winner_id');
     }
-
 }
