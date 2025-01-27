@@ -96,7 +96,26 @@ const GamePage = ({ tournament }) => {
 
     match.winner = winnerId;
 
-    // Update the next round match
+    try {
+      // Отправляем данные на сервер
+      const { status } = await axios.post(`/game/${tournament.id}/update-winner`, {
+        matchId: match.id,
+        winnerId,
+      });
+
+      if (status === 200) {
+        setBracketData(updatedBracket);
+        alert('Winner updated successfully!');
+      } else {
+        console.error('Unexpected server response:', status);
+        alert('Failed to update winner. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating winner:', error);
+      alert('Failed to update winner. Please check the console for more details.');
+    }
+
+    // Обновляем следующую стадию (при необходимости)
     if (roundIndex + 1 < updatedBracket.length) {
       const nextRound = updatedBracket[roundIndex + 1];
       const nextMatchIndex = Math.floor(matchIndex / 2);
