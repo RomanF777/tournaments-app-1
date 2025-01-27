@@ -1,35 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import '../../css/new.css';
+// Импорт необходимых библиотек и компонентов
+import React, { useState, useEffect } from 'react'; // Библиотека React, хуки useState и useEffect
+import axios from 'axios'; // Библиотека для HTTP-запросов
+import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets'; // Компоненты для отображения турнирной сетки
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'; // Шаблон для авторизованных пользователей
+import '../../css/new.css'; // Стили для страницы
 
+// Основной компонент страницы игры
 const GamePage = ({ tournament }) => {
+  // Состояние для данных турнирной сетки
   const [bracketData, setBracketData] = useState(tournament.bracketData || []);
-  const isAdmin = tournament.user_id === tournament.admin_id;
+  const isAdmin = tournament.user_id === tournament.admin_id; // Проверка, является ли пользователь администратором
 
+  // Эффект для генерации данных турнирной сетки, если она отсутствует
   useEffect(() => {
     if (!bracketData.length) generateInitialBracketData();
   }, [tournament, bracketData]);
 
+  // Функция для генерации начальных данных турнирной сетки
   const generateInitialBracketData = () => {
-    const participants = tournament.participants || [];
+    const participants = tournament.participants || []; // Участники турнира
     const teams = participants.map((participant, index) => ({
       id: index + 1,
       name: participant.name,
     }));
 
-    // Calculate total slots needed for the first round (power of 2)
+    // Вычисляем общее количество слотов для первой стадии (степень двойки)
     const totalSlots = Math.pow(2, Math.ceil(Math.log2(teams.length)));
-    const paddedTeams = [...teams, ...Array(totalSlots - teams.length).fill(null)];
+    const paddedTeams = [...teams, ...Array(totalSlots - teams.length).fill(null)]; // Дополняем участниками "Bye"
 
-    const rounds = Math.log2(totalSlots);
+    const rounds = Math.log2(totalSlots); // Количество стадий турнира
     const seeds = Array.from({ length: rounds }, (_, roundIndex) => ({
       round: roundIndex + 1,
       matches: [],
     }));
 
-    // Populate the first round
+    // Заполняем первую стадию матчами
     for (let i = 0; i < paddedTeams.length; i += 2) {
       const match = {
         id: i / 2 + 1,
@@ -39,14 +44,14 @@ const GamePage = ({ tournament }) => {
       };
 
       if (!match.participant2) {
-        match.winner = match.participant1?.id; // Auto-win for "Bye"
-        match.participant2 = { id: 0, name: 'Bye' }; // Assign a virtual Bye
+        match.winner = match.participant1?.id; // Победа по умолчанию для "Bye"
+        match.participant2 = { id: 0, name: 'Bye' }; // Назначаем виртуального участника
       }
 
       seeds[0].matches.push(match);
     }
 
-    // Generate subsequent rounds
+    // Генерация последующих стадий
     for (let roundIndex = 1; roundIndex < rounds; roundIndex++) {
       const previousRound = seeds[roundIndex - 1];
       const currentRound = seeds[roundIndex];
@@ -62,7 +67,7 @@ const GamePage = ({ tournament }) => {
         const match1 = previousRound.matches[i];
         const match2 = previousRound.matches[i + 1];
 
-        // Assign participants from previous round's winners
+        // Назначаем участников из победителей предыдущей стадии
         match.participant1 = match1?.winner ? match1.participant1 : { id: 0, name: '-' };
         match.participant2 = match2?.winner ? match2.participant1 : { id: 0, name: '-' };
 
@@ -70,9 +75,10 @@ const GamePage = ({ tournament }) => {
       }
     }
 
-    setBracketData(seeds);
+    setBracketData(seeds); // Устанавливаем данные турнирной сетки
   };
 
+  // Функция для обновления турнирной сетки на сервере
   const handleUpdateBracket = async (updatedData) => {
     try {
       const { status } = await axios.post(`/game/${tournament.id}/update-bracket`, { bracketData: updatedData });
@@ -89,15 +95,16 @@ const GamePage = ({ tournament }) => {
     }
   };
 
-  const handleSelectWinner = (roundIndex, matchIndex, winnerId) => {
-    const updatedBracket = structuredClone(bracketData);
+  // Функция для выбора победителя в конкретном матче
+  const handleSelectWinner = async (roundIndex, matchIndex, winnerId) => {
+    const updatedBracket = structuredClone(bracketData); // Клонируем текущую сетку
     const match = updatedBracket[roundIndex]?.matches[matchIndex];
     if (!match || match.winner) return;
 
     match.winner = winnerId;
 
     try {
-      // Отправляем данные на сервер
+      // Обновляем победителя на сервере
       const { status } = await axios.post(`/game/${tournament.id}/update-winner`, {
         matchId: match.id,
         winnerId,
@@ -115,7 +122,7 @@ const GamePage = ({ tournament }) => {
       alert('Failed to update winner. Please check the console for more details.');
     }
 
-    // Обновляем следующую стадию (при необходимости)
+    // Обновляем следующую стадию (если нужно)
     if (roundIndex + 1 < updatedBracket.length) {
       const nextRound = updatedBracket[roundIndex + 1];
       const nextMatchIndex = Math.floor(matchIndex / 2);
@@ -131,13 +138,13 @@ const GamePage = ({ tournament }) => {
         nextMatch.participant2 = match.participant1?.id === winnerId ? match.participant1 : match.participant2;
       }
 
-      // Auto-advance for "Bye" in next round
       if (!nextMatch.participant2) nextMatch.winner = nextMatch.participant1?.id;
     }
 
-    handleUpdateBracket(updatedBracket);
+    handleUpdateBracket(updatedBracket); // Сохраняем обновленную сетку
   };
 
+  // Компонент карточки матча
   const MatchCard = ({ roundIndex, match, matchIndex }) => (
     <div className="border border-gray-300 rounded-lg p-4 mb-4 bg-white shadow">
       <p className="text-lg font-medium">
@@ -160,6 +167,7 @@ const GamePage = ({ tournament }) => {
     </div>
   );
 
+  // Компонент кнопок администратора
   const AdminControls = ({ roundIndex, matchIndex, participant1, participant2 }) => (
     <div className="flex gap-4 mt-4">
       <button
@@ -177,6 +185,7 @@ const GamePage = ({ tournament }) => {
     </div>
   );
 
+  // Возвращаем структуру страницы
   return (
     <AuthenticatedLayout>
       <div className="game-page p-8 bg-gray-100 min-h-screen">
@@ -228,4 +237,5 @@ const GamePage = ({ tournament }) => {
   );
 };
 
+// Экспортируем компонент
 export default GamePage;

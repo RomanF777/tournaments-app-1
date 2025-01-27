@@ -18,6 +18,7 @@ class Tournament extends Model
         'bracket_data' => 'array',
     ];
 
+
     /**
      * Define the relationship to the User model.
      */
@@ -37,9 +38,6 @@ class Tournament extends Model
     protected static function boot()
     {
         parent::boot();
-
-        // Remove the unique path generation if you want to rely on the default auto-incrementing ID
-        // Commenting or removing this section entirely
     }
 }
 

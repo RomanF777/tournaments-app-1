@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('quizzes');
 
     Route::get('/tournaments', [TournamentController::class, 'index'])->name('tournaments.index');
+    Route::post('/tournament', [TournamentController::class, 'store']);
 
 
 
@@ -64,9 +65,11 @@ Route::get('/game/{id}', [TournamentController::class, 'showGame'])->name('game.
 // Route::post('/tournament/{id}/update-bracket', [TournamentController::class, 'updateBracket'])
 //     ->name('tournament.updateBracket');
 Route::post('/game/{tournament}/update-bracket', [TournamentController::class, 'updateBracket']);
+Route::post('/game/{tournament}/save-changes', [TournamentController::class, 'saveChanges']);
+Route::get('/game/{id}/bracket', [TournamentController::class, 'showGameBracket']);
 
 
-Route::post('/tournament', [TournamentController::class, 'store']);
+
 
 Route::get('/tournament/{id}/follow-status', [TournamentController::class, 'getFollowStatus']);
 Route::post('/tournament/{id}/follow', [TournamentController::class, 'follow']);

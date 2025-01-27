@@ -6,25 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tournament_matches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tournament_id')->constrained()->onDelete('cascade');
-            $table->integer('round');
-            $table->unsignedBigInteger('participant1_id')->nullable()->constrained('users');
-            $table->unsignedBigInteger('participant2_id')->nullable()->constrained('users');
-            $table->unsignedBigInteger('winner_id')->nullable()->constrained('users');
+            $table->unsignedBigInteger('tournament_id');
+            $table->unsignedBigInteger('round');
+            $table->unsignedBigInteger('participant1_id')->nullable();
+            $table->unsignedBigInteger('participant2_id')->nullable();
+            $table->unsignedBigInteger('winner_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('tournament_id')->references('id')->on('tournaments')->onDelete('cascade');
+            $table->foreign('participant1_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('participant2_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('winner_id')->references('id')->on('users')->onDelete('set null');
         });
+
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tournament_matches');

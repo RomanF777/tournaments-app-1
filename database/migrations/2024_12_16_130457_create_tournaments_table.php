@@ -14,7 +14,8 @@ class CreateTournamentsTable extends Migration
             $table->string('name');
             $table->string('type');
             $table->string('novus_type')->nullable();
-            $table->text('description');
+            $table->text('description')->nullable();
+            $table->json('bracket_data')->nullable();
             $table->timestamps();
         });
     }
