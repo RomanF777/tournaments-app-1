@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TournamentController;
+use App\Http\Controllers\ParticipantController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\RecruitingController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -44,9 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-    Route::get('/tournament/{id}/recruiting-status', [TournamentController::class, 'getRecruitingStatus']);
-    Route::post('/tournament/{id}/stop-recruiting', [TournamentController::class, 'stopRecruiting']);
-    Route::post('/tournament/{id}/start-recruiting', [TournamentController::class, 'startRecruiting']);
+    Route::get('/tournament/{id}/recruiting-status', [RecruitingController::class, 'getRecruitingStatus']);
+    Route::post('/tournament/{id}/stop-recruiting', [RecruitingController::class, 'stopRecruiting']);
+    Route::post('/tournament/{id}/start-recruiting', [RecruitingController::class, 'startRecruiting']);
 
 
 });
@@ -60,19 +63,19 @@ Route::middleware('auth')->group(function () {
 // Route::get('/tournament/{id}', [TournamentController::class, 'show'])->name('tournament.show');
 
 // Tournament start the game routes
-Route::post('/start-game', [TournamentController::class, 'startGame'])->name('game.start');
-Route::get('/game/{id}', [TournamentController::class, 'showGame'])->name('game.show');
-// Route::post('/tournament/{id}/update-bracket', [TournamentController::class, 'updateBracket'])
+Route::post('/start-game', [GameController::class, 'startGame'])->name('game.start');
+Route::get('/game/{id}', [GameController::class, 'showGame'])->name('game.show');
+// Route::post('/tournament/{id}/update-bracket', [GameController::class, 'updateBracket'])
 //     ->name('tournament.updateBracket');
-Route::post('/game/{tournament}/update-bracket', [TournamentController::class, 'updateBracket']);
+Route::post('/game/{tournament}/update-bracket', [GameController::class, 'updateBracket']);
 Route::post('/game/{tournament}/save-changes', [TournamentController::class, 'saveChanges']);
 Route::get('/game/{id}/bracket', [TournamentController::class, 'showGameBracket']);
 
 
 
 
-Route::get('/tournament/{id}/follow-status', [TournamentController::class, 'getFollowStatus']);
-Route::post('/tournament/{id}/follow', [TournamentController::class, 'follow']);
+Route::get('/tournament/{id}/follow-status', [ParticipantController::class, 'getFollowStatus']);
+Route::post('/tournament/{id}/follow', [ParticipantController::class, 'follow']);
 Route::delete('/tournament/{id}', [TournamentController::class, 'destroy']);
 
 

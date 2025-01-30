@@ -97,169 +97,169 @@ class TournamentController extends Controller
     }
 
 
-    // Метод для подписки/отписки от турнира
-    public function follow(Request $request, $id)
-    {
-        $tournament = Tournament::findOrFail($id); // Находим турнир
-        $userId = auth()->id(); // ID текущего пользователя
+    // // Метод для подписки/отписки от турнира
+    // public function follow(Request $request, $id)
+    // {
+    //     $tournament = Tournament::findOrFail($id); // Находим турнир
+    //     $userId = auth()->id(); // ID текущего пользователя
 
-        // Проверяем, является ли пользователь уже участником
-        $isParticipant = $tournament->participants()->where('user_id', $userId)->exists();
+    //     // Проверяем, является ли пользователь уже участником
+    //     $isParticipant = $tournament->participants()->where('user_id', $userId)->exists();
 
-        if ($isParticipant) {
-            // Если пользователь участник, удаляем его из участников
-            $tournament->participants()->detach($userId);
+    //     if ($isParticipant) {
+    //         // Если пользователь участник, удаляем его из участников
+    //         $tournament->participants()->detach($userId);
 
-            return response()->json([
-                'message' => 'Successfully left the tournament', // Успешное сообщение
-                'participants' => $tournament->participants->map(function ($participant) {
-                    return ['id' => $participant->id, 'name' => $participant->name];
-                }),
-                'participant_count' => $tournament->participants()->count(), // Количество участников
-            ]);
-        } else {
-            // Если пользователь не участник, добавляем его
-            $tournament->participants()->syncWithoutDetaching($userId);
+    //         return response()->json([
+    //             'message' => 'Successfully left the tournament', // Успешное сообщение
+    //             'participants' => $tournament->participants->map(function ($participant) {
+    //                 return ['id' => $participant->id, 'name' => $participant->name];
+    //             }),
+    //             'participant_count' => $tournament->participants()->count(), // Количество участников
+    //         ]);
+    //     } else {
+    //         // Если пользователь не участник, добавляем его
+    //         $tournament->participants()->syncWithoutDetaching($userId);
 
-            return response()->json([
-                'message' => 'Successfully followed the tournament', // Успешное сообщение
-                'participants' => $tournament->participants->map(function ($participant) {
-                    return ['id' => $participant->id, 'name' => $participant->name];
-                }),
-                'participant_count' => $tournament->participants()->count(), // Количество участников
-            ]);
-        }
-    }
-
-
-    // Метод для старта игры в турнире
-    public function startGame(Request $request)
-    {
-        $tournament = Tournament::findOrFail($request->input('id')); // Находим турнир по ID
-
-        // Проверяем права администратора
-        if (auth()->id() !== $tournament->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403); // Ошибка прав доступа
-        }
-
-        $participants = $tournament->participants()->get(); // Получаем список участников
-        if ($participants->count() < 2) {
-            return response()->json(['message' => 'The game cannot start with less than 2 participants.'], 400); // Минимум 2 участника
-        }
-
-        // Генерация первого раунда
-        $matches = [];
-        $shuffledParticipants = $participants->shuffle(); // Перемешиваем участников
-        for ($i = 0; $i < $shuffledParticipants->count(); $i += 2) {
-            $matches[] = TournamentMatch::create([
-                'tournament_id' => $tournament->id,
-                'round' => 1, // Первый раунд
-                'participant1_id' => $shuffledParticipants[$i]->id,
-                'participant2_id' => $shuffledParticipants[$i + 1]->id ?? null, // Проверка на нечетное число участников
-            ]);
-        }
-
-        // Возвращаем успешный ответ
-        return response()->json(['message' => 'Game started successfully', 'matches' => $matches]);
-    }
+    //         return response()->json([
+    //             'message' => 'Successfully followed the tournament', // Успешное сообщение
+    //             'participants' => $tournament->participants->map(function ($participant) {
+    //                 return ['id' => $participant->id, 'name' => $participant->name];
+    //             }),
+    //             'participant_count' => $tournament->participants()->count(), // Количество участников
+    //         ]);
+    //     }
+    // }
 
 
-    // Метод для отображения данных игры
-    public function showGame($id)
-    {
-        $tournament = Tournament::with('participants')->findOrFail($id); // Находим турнир с участниками
+    // // Метод для старта игры в турнире
+    // public function startGame(Request $request)
+    // {
+    //     $tournament = Tournament::findOrFail($request->input('id')); // Находим турнир по ID
 
-        // Возвращаем страницу игры с данными турнира
-        return Inertia::render('GamePage', [
-            'tournament' => [
-                'id' => $tournament->id,
-                'name' => $tournament->name,
-                'bracketData' => $tournament->bracket_data, // Данные для сетки турнира
-                'participants' => $tournament->participants->map(function ($participant) {
-                    return [
-                        'id' => $participant->id,
-                        'name' => $participant->name,
-                    ];
-                }),
-            ],
-        ]);
-    }
+    //     // Проверяем права администратора
+    //     if (auth()->id() !== $tournament->user_id) {
+    //         return response()->json(['message' => 'Unauthorized'], 403); // Ошибка прав доступа
+    //     }
 
+    //     $participants = $tournament->participants()->get(); // Получаем список участников
+    //     if ($participants->count() < 2) {
+    //         return response()->json(['message' => 'The game cannot start with less than 2 participants.'], 400); // Минимум 2 участника
+    //     }
 
-    // Метод для получения статуса набора участников
-    public function getRecruitingStatus($id)
-    {
-        $tournament = Tournament::findOrFail($id); // Находим турнир
-        return response()->json(['isRecruiting' => $tournament->is_recruiting]); // Возвращаем статус набора
-    }
+    //     // Генерация первого раунда
+    //     $matches = [];
+    //     $shuffledParticipants = $participants->shuffle(); // Перемешиваем участников
+    //     for ($i = 0; $i < $shuffledParticipants->count(); $i += 2) {
+    //         $matches[] = TournamentMatch::create([
+    //             'tournament_id' => $tournament->id,
+    //             'round' => 1, // Первый раунд
+    //             'participant1_id' => $shuffledParticipants[$i]->id,
+    //             'participant2_id' => $shuffledParticipants[$i + 1]->id ?? null, // Проверка на нечетное число участников
+    //         ]);
+    //     }
 
-
-    // Метод для остановки набора участников
-    public function stopRecruiting($id)
-    {
-        $tournament = Tournament::findOrFail($id); // Находим турнир
-
-        // Проверяем права администратора
-        if (auth()->id() !== $tournament->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403); // Ошибка прав доступа
-        }
-
-        $tournament->is_recruiting = false; // Останавливаем набор
-        $tournament->save(); // Сохраняем изменения
-
-        return response()->json(['message' => 'Recruiting stopped successfully']);
-    }
+    //     // Возвращаем успешный ответ
+    //     return response()->json(['message' => 'Game started successfully', 'matches' => $matches]);
+    // }
 
 
-    // Метод для старта набора участников
-    public function startRecruiting($id)
-    {
-        $tournament = Tournament::findOrFail($id); // Находим турнир
+    // // Метод для отображения данных игры
+    // public function showGame($id)
+    // {
+    //     $tournament = Tournament::with('participants')->findOrFail($id); // Находим турнир с участниками
 
-        // Проверяем права администратора
-        if (auth()->id() !== $tournament->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403); // Ошибка прав доступа
-        }
+    //     // Возвращаем страницу игры с данными турнира
+    //     return Inertia::render('GamePage', [
+    //         'tournament' => [
+    //             'id' => $tournament->id,
+    //             'name' => $tournament->name,
+    //             'bracketData' => $tournament->bracket_data, // Данные для сетки турнира
+    //             'participants' => $tournament->participants->map(function ($participant) {
+    //                 return [
+    //                     'id' => $participant->id,
+    //                     'name' => $participant->name,
+    //                 ];
+    //             }),
+    //         ],
+    //     ]);
+    // }
 
-        $tournament->is_recruiting = true; // Начинаем набор
-        $tournament->save(); // Сохраняем изменения
 
-        return response()->json(['message' => 'Recruiting started successfully']);
-    }
+    // // Метод для получения статуса набора участников
+    // public function getRecruitingStatus($id)
+    // {
+    //     $tournament = Tournament::findOrFail($id); // Находим турнир
+    //     return response()->json(['isRecruiting' => $tournament->is_recruiting]); // Возвращаем статус набора
+    // }
 
 
-    // Метод для проверки, подписан ли пользователь на турнир
-    public function getFollowStatus($id)
-    {
-        $tournament = Tournament::findOrFail($id); // Находим турнир
-        $isFollowing = $tournament->participants()->where('user_id', auth()->id())->exists(); // Проверяем подписку
+    // // Метод для остановки набора участников
+    // public function stopRecruiting($id)
+    // {
+    //     $tournament = Tournament::findOrFail($id); // Находим турнир
 
-        return response()->json(['isFollowing' => $isFollowing]);
-    }
+    //     // Проверяем права администратора
+    //     if (auth()->id() !== $tournament->user_id) {
+    //         return response()->json(['message' => 'Unauthorized'], 403); // Ошибка прав доступа
+    //     }
 
-    // Этот метод обновляет данные сетки турнира (bracket data).
-    public function updateBracket(Request $request, Tournament $tournament)
-    {
-        // Проверяем, является ли пользователь администратором турнира
-        if (auth()->id() !== $tournament->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403); // Возвращаем ошибку, если прав недостаточно
-        }
+    //     $tournament->is_recruiting = false; // Останавливаем набор
+    //     $tournament->save(); // Сохраняем изменения
 
-        // Валидация входящих данных
-        $validated = $request->validate([
-            'bracketData' => 'required|array', // Убедимся, что это массив
-        ]);
+    //     return response()->json(['message' => 'Recruiting stopped successfully']);
+    // }
 
-        // Логируем входящие данные для отладки
-        \Log::info('Bracket Data Received:', $validated['bracketData']);
 
-        // Обновляем данные сетки турнира
-        $tournament->update([
-            'bracket_data' => $validated['bracketData'], // Сохраняем обновленные данные
-        ]);
+    // // Метод для старта набора участников
+    // public function startRecruiting($id)
+    // {
+    //     $tournament = Tournament::findOrFail($id); // Находим турнир
 
-        return response()->json(['message' => 'Bracket updated successfully!'], 200); // Успешный ответ
-    }
+    //     // Проверяем права администратора
+    //     if (auth()->id() !== $tournament->user_id) {
+    //         return response()->json(['message' => 'Unauthorized'], 403); // Ошибка прав доступа
+    //     }
+
+    //     $tournament->is_recruiting = true; // Начинаем набор
+    //     $tournament->save(); // Сохраняем изменения
+
+    //     return response()->json(['message' => 'Recruiting started successfully']);
+    // }
+
+
+    // // Метод для проверки, подписан ли пользователь на турнир
+    // public function getFollowStatus($id)
+    // {
+    //     $tournament = Tournament::findOrFail($id); // Находим турнир
+    //     $isFollowing = $tournament->participants()->where('user_id', auth()->id())->exists(); // Проверяем подписку
+
+    //     return response()->json(['isFollowing' => $isFollowing]);
+    // }
+
+    // // Этот метод обновляет данные сетки турнира (bracket data).
+    // public function updateBracket(Request $request, Tournament $tournament)
+    // {
+    //     // Проверяем, является ли пользователь администратором турнира
+    //     if (auth()->id() !== $tournament->user_id) {
+    //         return response()->json(['message' => 'Unauthorized'], 403); // Возвращаем ошибку, если прав недостаточно
+    //     }
+
+    //     // Валидация входящих данных
+    //     $validated = $request->validate([
+    //         'bracketData' => 'required|array', // Убедимся, что это массив
+    //     ]);
+
+    //     // Логируем входящие данные для отладки
+    //     \Log::info('Bracket Data Received:', $validated['bracketData']);
+
+    //     // Обновляем данные сетки турнира
+    //     $tournament->update([
+    //         'bracket_data' => $validated['bracketData'], // Сохраняем обновленные данные
+    //     ]);
+
+    //     return response()->json(['message' => 'Bracket updated successfully!'], 200); // Успешный ответ
+    // }
 
 
 

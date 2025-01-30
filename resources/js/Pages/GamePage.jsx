@@ -1,241 +1,373 @@
-// Импорт необходимых библиотек и компонентов
-import React, { useState, useEffect } from 'react'; // Библиотека React, хуки useState и useEffect
-import axios from 'axios'; // Библиотека для HTTP-запросов
-import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets'; // Компоненты для отображения турнирной сетки
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'; // Шаблон для авторизованных пользователей
-import '../../css/new.css'; // Стили для страницы
+import "../../css/new.css"
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import cn from 'classnames';
 
-// Основной компонент страницы игры
-const GamePage = ({ tournament }) => {
-  // Состояние для данных турнирной сетки
-  const [bracketData, setBracketData] = useState(tournament.bracketData || []);
-  const isAdmin = tournament.user_id === tournament.admin_id; // Проверка, является ли пользователь администратором
-
-  // Эффект для генерации данных турнирной сетки, если она отсутствует
-  useEffect(() => {
-    if (!bracketData.length) generateInitialBracketData();
-  }, [tournament, bracketData]);
-
-  // Функция для генерации начальных данных турнирной сетки
-  const generateInitialBracketData = () => {
-    const participants = tournament.participants || []; // Участники турнира
-    const teams = participants.map((participant, index) => ({
-      id: index + 1,
-      name: participant.name,
-    }));
-
-    // Вычисляем общее количество слотов для первой стадии (степень двойки)
-    const totalSlots = Math.pow(2, Math.ceil(Math.log2(teams.length)));
-    const paddedTeams = [...teams, ...Array(totalSlots - teams.length).fill(null)]; // Дополняем участниками "Bye"
-
-    const rounds = Math.log2(totalSlots); // Количество стадий турнира
-    const seeds = Array.from({ length: rounds }, (_, roundIndex) => ({
-      round: roundIndex + 1,
-      matches: [],
-    }));
-
-    // Заполняем первую стадию матчами
-    for (let i = 0; i < paddedTeams.length; i += 2) {
-      const match = {
-        id: i / 2 + 1,
-        participant1: paddedTeams[i],
-        participant2: paddedTeams[i + 1],
-        winner: null,
-      };
-
-      if (!match.participant2) {
-        match.winner = match.participant1?.id; // Победа по умолчанию для "Bye"
-        match.participant2 = { id: 0, name: 'Bye' }; // Назначаем виртуального участника
-      }
-
-      seeds[0].matches.push(match);
-    }
-
-    // Генерация последующих стадий
-    for (let roundIndex = 1; roundIndex < rounds; roundIndex++) {
-      const previousRound = seeds[roundIndex - 1];
-      const currentRound = seeds[roundIndex];
-
-      for (let i = 0; i < previousRound.matches.length; i += 2) {
-        const match = {
-          id: i / 2 + 1,
-          participant1: null,
-          participant2: null,
-          winner: null,
-        };
-
-        const match1 = previousRound.matches[i];
-        const match2 = previousRound.matches[i + 1];
-
-        // Назначаем участников из победителей предыдущей стадии
-        match.participant1 = match1?.winner ? match1.participant1 : { id: 0, name: '-' };
-        match.participant2 = match2?.winner ? match2.participant1 : { id: 0, name: '-' };
-
-        currentRound.matches.push(match);
-      }
-    }
-
-    setBracketData(seeds); // Устанавливаем данные турнирной сетки
-  };
-
-  // Функция для обновления турнирной сетки на сервере
-  const handleUpdateBracket = async (updatedData) => {
-    try {
-      const { status } = await axios.post(`/game/${tournament.id}/update-bracket`, { bracketData: updatedData });
-      if (status === 200) {
-        setBracketData(updatedData);
-        alert('Bracket updated successfully!');
-      } else {
-        console.error('Unexpected server response:', status);
-        alert('Failed to update the bracket. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error updating bracket:', error);
-      alert('Failed to update the bracket. Please check the console for more details.');
-    }
-  };
-
-  // Функция для выбора победителя в конкретном матче
-  const handleSelectWinner = async (roundIndex, matchIndex, winnerId) => {
-    const updatedBracket = structuredClone(bracketData); // Клонируем текущую сетку
-    const match = updatedBracket[roundIndex]?.matches[matchIndex];
-    if (!match || match.winner) return;
-
-    match.winner = winnerId;
-
-    try {
-      // Обновляем победителя на сервере
-      const { status } = await axios.post(`/game/${tournament.id}/update-winner`, {
-        matchId: match.id,
-        winnerId,
-      });
-
-      if (status === 200) {
-        setBracketData(updatedBracket);
-        alert('Winner updated successfully!');
-      } else {
-        console.error('Unexpected server response:', status);
-        alert('Failed to update winner. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error updating winner:', error);
-      alert('Failed to update winner. Please check the console for more details.');
-    }
-
-    // Обновляем следующую стадию (если нужно)
-    if (roundIndex + 1 < updatedBracket.length) {
-      const nextRound = updatedBracket[roundIndex + 1];
-      const nextMatchIndex = Math.floor(matchIndex / 2);
-
-      if (!nextRound.matches[nextMatchIndex]) {
-        nextRound.matches[nextMatchIndex] = { participant1: null, participant2: null, winner: null };
-      }
-
-      const nextMatch = nextRound.matches[nextMatchIndex];
-      if (matchIndex % 2 === 0) {
-        nextMatch.participant1 = match.participant1?.id === winnerId ? match.participant1 : match.participant2;
-      } else {
-        nextMatch.participant2 = match.participant1?.id === winnerId ? match.participant1 : match.participant2;
-      }
-
-      if (!nextMatch.participant2) nextMatch.winner = nextMatch.participant1?.id;
-    }
-
-    handleUpdateBracket(updatedBracket); // Сохраняем обновленную сетку
-  };
-
-  // Компонент карточки матча
-  const MatchCard = ({ roundIndex, match, matchIndex }) => (
-    <div className="border border-gray-300 rounded-lg p-4 mb-4 bg-white shadow">
-      <p className="text-lg font-medium">
-        {match.participant1?.name || <span className="text-gray-500">Bye</span>} vs{' '}
-        {match.participant2?.name || <span className="text-gray-500">Bye</span>}
-      </p>
-      {match.winner && (
-        <p className="text-green-600 font-semibold mt-2">
-          Winner: {match.winner === match.participant1?.id ? match.participant1?.name : match.participant2?.name}
-        </p>
-      )}
-      {isAdmin && !match.winner && match.participant1 && match.participant2 && (
-        <AdminControls
-          roundIndex={roundIndex}
-          matchIndex={matchIndex}
-          participant1={match.participant1}
-          participant2={match.participant2}
-        />
-      )}
-    </div>
-  );
-
-  // Компонент кнопок администратора
-  const AdminControls = ({ roundIndex, matchIndex, participant1, participant2 }) => (
-    <div className="flex gap-4 mt-4">
-      <button
-        onClick={() => handleSelectWinner(roundIndex, matchIndex, participant1?.id)}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-      >
-        {participant1?.name}
-      </button>
-      <button
-        onClick={() => handleSelectWinner(roundIndex, matchIndex, participant2?.id)}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-      >
-        {participant2?.name}
-      </button>
-    </div>
-  );
-
-  // Возвращаем структуру страницы
-  return (
-    <AuthenticatedLayout>
-      <div className="game-page p-8 bg-gray-100 min-h-screen">
-        <h1 className="text-3xl font-bold mb-8 text-center">{tournament.name} - Bracket</h1>
-        {bracketData.length > 0 ? (
-          <Bracket
-            rounds={bracketData.map((round, roundIndex) => ({
-              title: `Round ${round.round}`,
-              seeds: round.matches.map((match) => ({
-                id: match.id,
-                teams: [
-                  { name: match.participant1?.name || '-' },
-                  { name: match.participant2?.name || '-' },
-                ],
-              })),
-            }))}
-            renderSeedComponent={({ seed }) => (
-              <Seed>
-                <SeedItem>
-                  <SeedTeam className="text-center text-white-800">{seed.teams[0]?.name || '-'}</SeedTeam>
-                  <SeedTeam className="text-center text-white-800">{seed.teams[1]?.name || '-'}</SeedTeam>
-                </SeedItem>
-              </Seed>
-            )}
-          />
-        ) : (
-          <p className="text-center text-gray-600">No bracket data available.</p>
-        )}
-
-        {isAdmin && bracketData.length > 0 && (
-          <div className="admin-bracket mt-8">
-            {bracketData.map((round, roundIndex) => (
-              <div key={roundIndex} className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Round {round.round}</h2>
-                {round.matches.map((match, matchIndex) => (
-                  <MatchCard
-                    key={matchIndex}
-                    roundIndex={roundIndex}
-                    match={match}
-                    matchIndex={matchIndex}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </AuthenticatedLayout>
-  );
+// Анимационные константы
+const matchAnimation = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
 };
 
-// Экспортируем компонент
+const initialStats = (participants) =>
+  participants.reduce((acc, p) => ({
+    ...acc,
+    [p.id]: {
+      seriesWins: 0,
+      seriesLosses: 0,
+      matchWins: 0,
+      matchLosses: 0,
+      status: 'active'
+    }
+  }), {});
+
+const GamePage = ({ tournament }) => {
+  const participants = tournament?.participants || [];
+  const [rounds, setRounds] = useState([]);
+  const [currentRound, setCurrentRound] = useState(0);
+  const [stats, setStats] = useState(() => initialStats(participants));
+  const [history, setHistory] = useState([]);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+
+  // Генерация начальной сетки
+  useEffect(() => {
+    if (participants.length > 0) {
+      const initialMatches = generateMatches(participants, 0);
+      setRounds([initialMatches]);
+      setCurrentRound(0);
+    }
+  }, [participants]);
+
+  // Логика формирования следующих раундов
+  useEffect(() => {
+    if (rounds.length === 0) return;
+
+    const currentMatches = rounds[currentRound];
+    const allCompleted = currentMatches.every(m => m.seriesWinner);
+
+    if (allCompleted && currentRound === rounds.length - 1) {
+      const winners = currentMatches
+        .map(m => participants.find(p => p.id === m.seriesWinner))
+        .filter(Boolean);
+
+      if (winners.length >= 2) {
+        const nextRoundMatches = generateMatches(winners, currentRound + 1);
+        setRounds(prev => [...prev, nextRoundMatches]);
+        setCurrentRound(prev => prev + 1);
+      }
+    }
+  }, [rounds, currentRound, participants]);
+
+  function generateMatches(participants, round) {
+    const shuffled = [...participants].sort(() => Math.random() - 0.5);
+    const matches = [];
+
+    for (let i = 0; i < shuffled.length; i += 2) {
+      const match = {
+        round,
+        id: `${round}-${matches.length}`,
+        player1: shuffled[i],
+        player2: shuffled[i + 1] || null,
+        series: [],
+        seriesWinner: null
+      };
+
+      if (!match.player2) {
+        match.seriesWinner = match.player1.id;
+      }
+
+      matches.push(match);
+    }
+
+    return matches;
+  }
+
+  const handleMatchWin = (roundIndex, matchIndex, winnerId) => {
+    const updatedRounds = [...rounds];
+    const match = updatedRounds[roundIndex][matchIndex];
+
+    // Обновляем историю
+    setHistory(prev => [...prev, {
+      matchId: match.id,
+      winner: winnerId,
+      timestamp: new Date().toISOString()
+    }]);
+
+    // Обновляем статистику
+    const loserId = winnerId === match.player1?.id ?
+      match.player2?.id : match.player1?.id;
+
+      setStats(prev => ({
+        ...prev,
+        [winnerId]: {
+          ...prev[winnerId],
+          seriesWins: prev[winnerId].seriesWins + 1,
+          status: prev[winnerId].seriesWins + 1 >= 3 ? 'qualified' : 'active'
+        },
+        ...(loserId && {
+          [loserId]: {
+            ...prev[loserId],
+            seriesLosses: prev[loserId].seriesLosses + 1,
+            status: prev[loserId].seriesLosses + 1 >= 3 ? 'eliminated' : 'active'
+          }
+        })
+      }));
+
+
+    // Проверка завершения серии
+    const series = [...match.series, winnerId];
+    const wins1 = series.filter(id => id === match.player1?.id).length;
+    const wins2 = series.filter(id => id === match.player2?.id).length;
+
+    const requiredWins = Math.max(wins1, wins2) >= 2 &&
+      Math.abs(wins1 - wins2) >= 2 ? 2 : 3;
+
+    if (wins1 >= requiredWins || wins2 >= requiredWins) {
+      match.seriesWinner = winnerId;
+      setStats(prev => ({
+        ...prev,
+        [winnerId]: {
+          ...prev[winnerId],
+          matchWins: prev[winnerId].matchWins + 1
+        },
+        ...(loserId && {
+          [loserId]: {
+            ...prev[loserId],
+            matchLosses: prev[loserId].matchLosses + 1
+          }
+        })
+      }));
+    }
+
+    match.series = series;
+    setRounds(updatedRounds);
+  };
+
+  return (
+    <AuthenticatedLayout>
+    <div className="p-8 bg-gray-100 min-h-screen">
+      {/* Статистика участников */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="mb-8 bg-white rounded-lg shadow"
+      >
+        {/* ... (ваша существующая таблица статистики) ... */}
+      </motion.div>
+
+      {/* // Добавляем в компонент GamePage перед турнирной сеткой */}
+
+        <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8 bg-white rounded-lg shadow overflow-hidden"
+        >
+        <table className="w-full">
+            <thead className="bg-gray-50">
+            <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Игрок</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Матчи</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Победы</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Победы %</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Серии W</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Разница W/L</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Статус</th>
+            </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+            {participants
+                .sort((a, b) => {
+                const statsA = stats[a.id];
+                const statsB = stats[b.id];
+                // Сортировка по количеству побед в сериях
+                if (statsA.seriesWins !== statsB.seriesWins) {
+                    return statsB.seriesWins - statsA.seriesWins;
+                }
+                // Затем по проценту побед
+                const aPercent = statsA.seriesWins / (statsA.seriesWins + statsA.seriesLosses) || 0;
+                const bPercent = statsB.seriesWins / (statsB.seriesWins + statsB.seriesLosses) || 0;
+                return bPercent - aPercent;
+                })
+                .map((participant) => {
+                const {
+                    seriesWins,
+                    seriesLosses,
+                    matchWins,
+                    matchLosses,
+                    status
+                } = stats[participant.id];
+
+                const totalSeries = seriesWins + seriesLosses;
+                const winPercentage = totalSeries > 0
+                    ? ((seriesWins / totalSeries) * 100).toFixed(1)
+                    : 0;
+                const wlDiff = matchWins - matchLosses;
+
+                return (
+                    <motion.tr
+                    key={participant.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={cn(
+                        'hover:bg-gray-50',
+                        status === 'qualified' && 'bg-green-50',
+                        status === 'eliminated' && 'bg-red-50'
+                    )}
+                    >
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                        {participant.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-center text-gray-500">
+                        {totalSeries}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-center text-gray-500">
+                        <span className="font-semibold text-green-600">
+                        {seriesWins}
+                        </span>
+                        <span className="mx-1">/</span>
+                        <span className="text-red-600">{seriesLosses}</span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-center text-gray-500">
+                        {totalSeries > 0 ? `${winPercentage}%` : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-center text-gray-500">
+                        {matchWins}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-center text-gray-500">
+                        <span className={cn(
+                        'font-semibold',
+                        wlDiff > 0 ? 'text-green-600' : 'text-red-600'
+                        )}>
+                        {wlDiff >= 0 ? `+${wlDiff}` : wlDiff}
+                        </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                        {status === 'qualified' && (
+                        <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                            Прошел
+                        </span>
+                        )}
+                        {status === 'eliminated' && (
+                        <span className="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">
+                            Выбыл
+                        </span>
+                        )}
+                        {status === 'active' && (
+                            <span className="px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
+                            Активный
+                            </span>
+                        )}
+                    </td>
+
+                    </motion.tr>
+                );
+                })}
+            </tbody>
+        </table>
+        </motion.div>
+
+      {/* Турнирная сетка */}
+      <div className="tournament-grid">
+        {rounds.map((roundMatches, roundIndex) => (
+          <div key={roundIndex} className="round-column">
+            <h3 className="text-xl font-bold mb-4">Раунд {roundIndex + 1}</h3>
+            <AnimatePresence>
+              {roundMatches.map((match, matchIndex) => (
+                <motion.div
+                  key={match.id}
+                  variants={matchAnimation}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="match-card"
+                  onClick={() => setSelectedMatch(match)}
+                >
+                  <div className="players">
+                    <div className={`player ${match.seriesWinner === match.player1?.id ? 'winner' : ''}`}>
+                      {match.player1?.name || 'Bye'}
+                    </div>
+                    <div className="vs">vs</div>
+                    <div className={`player ${match.seriesWinner === match.player2?.id ? 'winner' : ''}`}>
+                      {match.player2?.name || 'Bye'}
+                    </div>
+                  </div>
+
+                  <div className="series-score">
+                    {match.series.map((game, idx) => (
+                      <div
+                        key={idx}
+                        className={`game-dot ${game === match.player1?.id ? 'blue' : 'red'}`}
+                      />
+                    ))}
+                  </div>
+
+                  {!match.seriesWinner && (
+                    <div className="controls">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMatchWin(roundIndex, matchIndex, match.player1.id);
+                        }}
+                        className="win-button blue"
+                      >
+                        Win {match.player1?.name}
+                      </button>
+                      {match.player2 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMatchWin(roundIndex, matchIndex, match.player2.id);
+                          }}
+                          className="win-button red"
+                        >
+                          Win {match.player2?.name}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+
+      {/* Модалка истории матча */}
+      <AnimatePresence>
+        {selectedMatch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="match-history-modal"
+            onClick={() => setSelectedMatch(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>История матча</h3>
+              <div className="timeline">
+                {selectedMatch.series.map((game, idx) => (
+                  <div key={idx} className="timeline-event">
+                    <div className="event-time">Game {idx + 1}</div>
+                    <div className="event-winner">
+                      Winner: {participants.find(p => p.id === game)?.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+    </AuthenticatedLayout>
+  );
+};
+
 export default GamePage;
