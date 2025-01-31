@@ -12,16 +12,16 @@ const matchAnimation = {
 };
 
 const initialStats = (participants) =>
-  participants.reduce((acc, p) => ({
-    ...acc,
-    [p.id]: {
-      seriesWins: 0,
-      seriesLosses: 0,
-      matchWins: 0,
-      matchLosses: 0,
-      status: 'active'
-    }
-  }), {});
+  participants.reduce((acc, p) => ({
+    ...acc,
+    [p.id]: {
+      seriesWins: 0,
+      seriesLosses: 0,
+      matchWins: 0,
+      matchLosses: 0,
+      status: 'active' // Все игроки начинают как активные
+    }
+  }), {});
 
 const GamePage = ({ tournament }) => {
   const participants = tournament?.participants || [];
@@ -84,66 +84,73 @@ const GamePage = ({ tournament }) => {
     return matches;
   }
 
-  const handleMatchWin = (roundIndex, matchIndex, winnerId) => {
-    const updatedRounds = [...rounds];
-    const match = updatedRounds[roundIndex][matchIndex];
+const handleMatchWin = (roundIndex, matchIndex, winnerId) => {
+  const updatedRounds = [...rounds];
+  const match = updatedRounds[roundIndex][matchIndex];
 
-    // Обновляем историю
-    setHistory(prev => [...prev, {
-      matchId: match.id,
-      winner: winnerId,
-      timestamp: new Date().toISOString()
-    }]);
+  // Обновляем историю
+  setHistory(prev => [...prev, {
+    matchId: match.id,
+    winner: winnerId,
+    timestamp: new Date().toISOString()
+  }]);
 
-    // Обновляем статистику
-    const loserId = winnerId === match.player1?.id ?
-      match.player2?.id : match.player1?.id;
+  const loserId = winnerId === match.player1?.id
+    ? match.player2?.id
+    : match.player1?.id;
 
-      setStats(prev => ({
-        ...prev,
-        [winnerId]: {
-          ...prev[winnerId],
-          seriesWins: prev[winnerId].seriesWins + 1,
-          status: prev[winnerId].seriesWins + 1 >= 3 ? 'qualified' : 'active'
-        },
-        ...(loserId && {
-          [loserId]: {
-            ...prev[loserId],
-            seriesLosses: prev[loserId].seriesLosses + 1,
-            status: prev[loserId].seriesLosses + 1 >= 3 ? 'eliminated' : 'active'
-          }
-        })
-      }));
+  // Проверка завершения серии
+  const series = [...match.series, winnerId];
+  const wins1 = series.filter(id => id === match.player1?.id).length;
+  const wins2 = series.filter(id => match.player2 && id === match.player2.id).length;
 
+  // Определяем необходимое количество побед для серии
+  const requiredWins = (Math.max(wins1, wins2) >= 2 && Math.abs(wins1 - wins2) >= 2)
+    ? 2
+    : 3;
 
-    // Проверка завершения серии
-    const series = [...match.series, winnerId];
-    const wins1 = series.filter(id => id === match.player1?.id).length;
-    const wins2 = series.filter(id => id === match.player2?.id).length;
+  // Если серия завершена
+  if (wins1 >= requiredWins || wins2 >= requiredWins) {
+    match.seriesWinner = winnerId;
 
-    const requiredWins = Math.max(wins1, wins2) >= 2 &&
-      Math.abs(wins1 - wins2) >= 2 ? 2 : 3;
+    // Обновляем статусы ТОЛЬКО при завершении серии
+    setStats(prev => ({
+      ...prev,
+      [winnerId]: {
+        ...prev[winnerId],
+        seriesWins: prev[winnerId].seriesWins + 1,
+        matchWins: prev[winnerId].matchWins + wins1,
+        status: 'qualified' // Устанавливаем статус сразу при победе в серии
+      },
+      ...(loserId && {
+        [loserId]: {
+          ...prev[loserId],
+          seriesLosses: prev[loserId].seriesLosses + 1,
+          matchLosses: prev[loserId].matchLosses + wins2,
+          status: 'eliminated' // Помечаем проигравшего
+        }
+      })
+    }));
+  } else {
+    // Если серия продолжается, обновляем только счет матчей
+    setStats(prev => ({
+      ...prev,
+      [winnerId]: {
+        ...prev[winnerId],
+        matchWins: prev[winnerId].matchWins + 1
+      },
+      ...(loserId && {
+        [loserId]: {
+          ...prev[loserId],
+          matchLosses: prev[loserId].matchLosses + 1
+        }
+      })
+    }));
+  }
 
-    if (wins1 >= requiredWins || wins2 >= requiredWins) {
-      match.seriesWinner = winnerId;
-      setStats(prev => ({
-        ...prev,
-        [winnerId]: {
-          ...prev[winnerId],
-          matchWins: prev[winnerId].matchWins + 1
-        },
-        ...(loserId && {
-          [loserId]: {
-            ...prev[loserId],
-            matchLosses: prev[loserId].matchLosses + 1
-          }
-        })
-      }));
-    }
-
-    match.series = series;
-    setRounds(updatedRounds);
-  };
+  match.series = series;
+  setRounds(updatedRounds);
+};
 
   return (
     <AuthenticatedLayout>
