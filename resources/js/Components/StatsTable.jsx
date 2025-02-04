@@ -29,10 +29,10 @@ export const StatsTable = ({ participants, stats, rounds, selectedMatch, setSele
             <thead className="bg-gray-50">
             <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Игрок</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Матчи</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Серии</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Победы</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Победы %</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Серии W</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Матчи W</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Разница W/L</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Статус</th>
             </tr>
