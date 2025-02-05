@@ -5,10 +5,33 @@ import AuthenticatedLayout from '../Layouts/AuthenticatedLayout';
 import cn from 'classnames';
 
 
-export const StatsTable = ({ participants, stats, rounds, selectedMatch, setSelectedMatch, handleMatchWin }) => {
+export const StatsTable = ({ setPlayoffCount, playoffCount, isQualifying, participants, stats, rounds, selectedMatch, setSelectedMatch, handleMatchWin }) => {
   return (
         <AuthenticatedLayout>
-    <div className="p-8 bg-gray-100 min-h-screen">
+          {isQualifying && (
+      <div className="playoff-controls">
+        <label>
+          Участников в плей-офф:
+          <input
+            type="number"
+            min="2"
+            max={participants.length}
+            value={playoffCount}
+            onChange={(e) => {
+              let value = Math.max(2, parseInt(e.target.value) || 2);
+              value = Math.min(value, participants.length);
+              setPlayoffCount(value);
+            }}
+            className="playoff-input"
+            disabled={!isQualifying}
+          />
+        </label>
+        <span className="hint">
+          (Максимум: {participants.length})
+        </span>
+      </div>
+    )}
+    <div className="bg-gray-100 min-h-screen">
       {/* Статистика участников */}
       <motion.div
         initial={{ opacity: 0 }}
