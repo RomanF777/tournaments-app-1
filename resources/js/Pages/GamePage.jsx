@@ -96,28 +96,38 @@ const GamePage = ({ tournament }) => {
 
 
   // Эффект для обработки логики плей-офф (генерация следующего раунда)
-useEffect(() => {
-  if (!isQualifying && rounds.length > 0) {
-    const lastRound = rounds[rounds.length - 1];
-    const allCompleted = lastRound.every(match => match.seriesWinner);
+  useEffect(() => {
+    if (!isQualifying && rounds.length > 0) {
+      const lastRound = rounds[rounds.length - 1];
+      const allCompleted = lastRound.every(match => match.seriesWinner);
 
-    if (allCompleted) {
-      // Получаем победителей текущего раунда
-      const winners = lastRound
-        .map(match => match.player1?.id === match.seriesWinner ? match.player1 : match.player2)
-        .filter(Boolean);
+      if (allCompleted) {
+        // Получаем победителей текущего раунда
+        const winners = lastRound
+          .map(match => match.player1?.id === match.seriesWinner ? match.player1 : match.player2)
+          .filter(Boolean);
 
-      // Если остаётся более одного победителя, генерируем новый раунд
-      if (winners.length > 1) {
-        const nextRound = generatePlayoffMatches(winners, rounds.length);
-        setRounds(prev => [...prev, nextRound]);
-      } else {
-        // Турнир завершён — можно обработать финал, например, вывести сообщение о победителе
-        console.log("Турнир завершён. Победитель:", winners[0]?.name);
+        if (winners.length === 1) {
+          // Убедимся, что все проигравшие помечены как "eliminated"
+          setStats(prevStats => {
+            const newStats = { ...prevStats };
+            participants.forEach(p => {
+              if (p.id !== winners[0].id) {
+                newStats[p.id].status = 'eliminated';
+              }
+            });
+            return newStats;
+          });
+
+          console.log("Турнир завершён. Победитель:", winners[0]?.name);
+        } else {
+          const nextRound = generatePlayoffMatches(winners, rounds.length);
+          setRounds(prev => [...prev, nextRound]);
+        }
       }
     }
-  }
-}, [rounds, isQualifying]);
+  }, [rounds, isQualifying]);
+
 
 
   // Логика завершения раундов
@@ -222,15 +232,17 @@ useEffect(() => {
         newStats[winnerId].seriesWins += 1;
         if (loserId) newStats[loserId].seriesLosses += 1;
 
-        // if (newStats[winnerId].seriesWins >= 3) {
-        //   newStats[winnerId].status = 'qualified';
-        // }
-        // if (loserId && newStats[loserId].seriesLosses >= 3) {
-        //   newStats[loserId].status = 'eliminated';
-        // }
+        // Automatic status updates
+        if (newStats[winnerId].seriesWins >= 3) {
+          newStats[winnerId].status = 'qualified';
+        }
+        if (loserId && newStats[loserId].seriesLosses >= 3) {
+          newStats[loserId].status = 'eliminated';
+        }
       }
       return newStats;
     });
+
 
     // Обновляем матч
     match.series = series;

@@ -91,16 +91,19 @@ export const StatsTable = ({ setPlayoffCount, playoffCount, isQualifying, partic
                 const wlDiff = Number(matchWins) - Number(matchLosses);
 
                 return (
-                    <motion.tr
-                    key={participant.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className={cn(
-                        'hover:bg-gray-50',
-                        status === 'qualified' && 'bg-green-50',
-                        status === 'eliminated' && 'bg-red-50'
-                    )}
-                    >
+                  <motion.tr
+                    key={participant.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={cn(
+                      'hover:bg-gray-50',
+                      status === 'qualified' && 'bg-green-100',
+                      status === 'eliminated' && 'bg-red-100',
+                      status === 'active' && 'bg-gray-100',
+                      // seriesWins >= 3 && 'bg-blue-100' // Highlight top performers
+                    )}
+                  >
+
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {participant.name}
                     </td>
@@ -128,23 +131,24 @@ export const StatsTable = ({ setPlayoffCount, playoffCount, isQualifying, partic
                         {wlDiff >= 0 ? `+${wlDiff}` : wlDiff}
                         </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                        {status === 'qualified' && (
-                        <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
-                            Прошел
-                        </span>
-                        )}
-                        {status === 'eliminated' && (
-                        <span className="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">
-                            Выбыл
-                        </span>
-                        )}
-                        {status === 'active' && (
-                            <span className="px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
-                            Активный
-                            </span>
-                        )}
-                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {status === 'qualified' && (
+                        <span className="px-2 py-1 text-xs font-semibold text-green-700 bg-green-200 rounded-full">
+                          Прошел
+                        </span>
+                      )}
+                      {status === 'eliminated' && (
+                        <span className="px-2 py-1 text-xs font-semibold text-red-700 bg-red-200 rounded-full">
+                          Выбыл
+                        </span>
+                      )}
+                      {status === 'active' && (
+                        <span className="px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-200 rounded-full">
+                          Активный
+                        </span>
+                      )}
+                    </td>
+
 
                     </motion.tr>
                 );
